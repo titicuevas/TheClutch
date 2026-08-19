@@ -8,9 +8,19 @@ El usuario no controla los partidos. Toma decisiones. El motor simula la carrera
 
 ## Estado
 
-Fase 0: fundación. Hay documentación y reglas de agentes. **Aún no hay app ni engine implementados.**
+Fase 1 en curso: hay un **vertical slice del engine** (sin UI). Genera un jugador por seed, simula temporadas y imprime un legacy en consola.
 
 La fuente de verdad está en [`/docs`](docs/README.md).
+
+## Probar el motor
+
+```bash
+pnpm install
+pnpm test
+pnpm sim -- --seed demo-01
+```
+
+Misma `--seed` = mismo jugador. `--run` distinta = misma carta, otra suerte de temporada.
 
 ## Stack previsto
 

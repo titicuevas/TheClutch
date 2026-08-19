@@ -1,0 +1,9 @@
+{
+  "name": "theclutch",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "test": "pnpm --filter @theclutch/engine test",
+    "sim": "pnpm --filter @theclutch/engine sim"
+  }
+}

@@ -23,6 +23,8 @@ No construir ranking antes de que la carrera sea divertida. No construir 200 eve
 
 ## Fase 1 — Vertical slice del engine (sin UI rica)
 
+**Estado: slice jugable en CLI.** `pnpm sim -- --seed demo-01`
+
 Objetivo: en Node, generar un jugador, simular N temporadas, retirar, imprimir legacy.
 
 Incluye:
@@ -33,7 +35,7 @@ Incluye:
 - desarrollo / regresión / edad;
 - lesión básica;
 - `calculateLegacy` placeholder;
-- tests unitarios + un batch de 100–1000 runs.
+- tests unitarios + CLI.
 
 No incluye: eventos ricos, draft ceremonia, Daily, Next.js pulido.
 
