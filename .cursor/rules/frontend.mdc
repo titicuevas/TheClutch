@@ -1,0 +1,16 @@
+---
+description: Frontend Agent — UI mobile-first, view models, accesibilidad
+globs: apps/web/**/*.tsx,apps/web/components/**/*.ts,apps/web/app/**/*.tsx
+alwaysApply: false
+---
+
+# Frontend / UI
+
+Mobile-first. Una acción primaria por pantalla. Números grandes, poco chrome.
+
+- La UI no muta `CareerState`. Solo `dispatch` + `getViewModel`.
+- No muestres potencial exacto ni 14 atributos a la vez.
+- Eventos: renderiza `EventDefinition`; no generes copy en el cliente.
+- Targets ~44px, contraste, no dependas solo del color para rol/forma.
+- No importes módulos internos del engine; solo el barrel público.
+- Carrera 10–20 min: evita menús profundos y box scores de 82 partidos.

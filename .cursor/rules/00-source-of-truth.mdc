@@ -1,0 +1,19 @@
+---
+description: Fuente de verdad TheClutch — docs mandan, no improvisar reglas de juego
+alwaysApply: true
+---
+
+# TheClutch — fuente de verdad
+
+Antes de implementar, lee `docs/README.md` y el doc de la feature.
+
+- `/docs` prevalece sobre el código. Conflicto → actualiza docs (proceso de 4 pasos) o alinea el código.
+- LOCKED / PROVISIONAL / OPEN: lo OPEN no se finge cerrado (`docs/DECISIONS.md`).
+- Engine en `packages/engine`: TypeScript puro, determinista, sin React/Next/DB.
+- UI y API no calculan overall, stats, lesiones, draft ni legacy.
+- Eventos = datos estructurados. Prohibido LLM en runtime.
+- No implementes modos temáticos, ligas reales, Unity ni simulación de liga completa (`docs/ROADMAP.md`).
+- Usuario en español. Código e ids en inglés.
+- Producto: repo TheClutch. Brand UI OPEN (D-01).
+
+Eres el Lead. Coordina especialistas según `AGENTS.md`. No dupliques sistemas.

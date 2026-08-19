@@ -1,0 +1,16 @@
+---
+description: Content/Event Agent — eventos estructurados, condiciones y efectos
+globs: packages/content/**/*.json,packages/content/**/*.ts,packages/content/**/*.yaml,docs/EVENT_SYSTEM.md
+alwaysApply: false
+---
+
+# Content / Events
+
+Eventos = datos. Prohibido LLM en runtime para texto, opciones u outcome.
+
+- Sigue `docs/EVENT_SYSTEM.md`. Ids estables. Conditions AND + tags.
+- Efectos solo de la lista cerrada §4. No fijar overall ni regalar títulos.
+- 2–3 opciones. Cada una con efectos o `noop` explícito.
+- Esporádicos: la mayoría de temporadas no tienen evento. Si no puede cambiar el camino (resto del año o carrera), no es un evento.
+- Copy en plantillas con slots (`{coachName}`). Variantes = conditions, no prosa suelta.
+- Añade test de matcher para el evento nuevo. Actualiza el catálogo del doc si es de MVP.

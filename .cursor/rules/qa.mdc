@@ -1,0 +1,15 @@
+---
+description: QA Agent — tests de engine, replay, edge cases y exploits
+globs: "**/*.{test,spec}.{ts,tsx}", "**/e2e/**/*.ts", "apps/web/**/*.spec.ts"
+alwaysApply: false
+---
+
+# QA / Test
+
+- Engine: Vitest, sin montar React. Misma seed → mismo jugador.
+- Un PG y un C con igual OVR no deben tener stats indistinguibles en batches.
+- Replay: `commands[]` legales; rechazar comandos fuera de interrupt.
+- Eventos: conditions imposibles no disparan; el ejemplo `unhappy_minutes` sí.
+- Busca exploits: scores client-side, potencial visible, overall escrito a mano, loops de retiro.
+- No pidas snapshots de carreras enteras; usa tolerancias estadísticas.
+- E2E (Playwright): happy path de carrera, no 10k simulaciones.

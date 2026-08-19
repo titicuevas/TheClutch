@@ -1,0 +1,16 @@
+---
+description: Backend Agent — persistencia, APIs, auth, seeds y rankings
+globs: apps/web/server/**/*.ts,apps/web/app/api/**/*.ts,apps/web/lib/db/**/*.ts
+alwaysApply: false
+---
+
+# Backend
+
+No reimplementes reglas de juego. Importa `packages/engine`.
+
+- Daily/Challenge: replay del `commands[]` en servidor; no confíes el score del cliente.
+- Persiste seeds, versiones (`engine`, `content`, `schema`) y el log. Estado = JSON versionado.
+- Primer intento Daily oficial: `docs/DAILY_MODE.md`.
+- `playerSeed` ≠ `runSeed`. No mezclarlas.
+- Auth solo cuando D-12 esté cerrado. Fase 1–3 pueden vivir sin ranking.
+- Nunca calcules desarrollo, lesiones o legacy en SQL.

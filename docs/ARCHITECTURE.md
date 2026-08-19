@@ -1,0 +1,244 @@
+# Architecture
+
+Estado: **PROVISIONAL** para el MVP. Los principios de separación engine/UI son **LOCKED**.
+
+## 1. Principios (LOCKED)
+
+1. El **game engine es TypeScript puro**, sin React, sin Next, sin Prisma, sin `window`, sin `fs`.
+2. Dado `(state, command, rng)`, el engine es **determinista**.
+3. La UI no calcula overall, stats, lesiones ni legacy. Solo muestra view models.
+4. El backend no reimplementa reglas de juego. Llama al mismo package `engine`.
+5. `/docs` manda sobre el código. El código no inventa reglas.
+6. Mobile-first. Web app, no motor 3D.
+
+## 2. Stack propuesto
+
+| Capa | Tecnología | Notas |
+| --- | --- | --- |
+| App | Next.js (App Router) + React + TypeScript | SSR donde ayude al marketing/auth; la partida es cliente + validación servidor |
+| Estilos | Tailwind CSS | Mobile-first |
+| Engine | TypeScript (package propio) | Vitest |
+| Contenido | JSON/YAML versionado en `packages/content` | Eventos, nombres, arquetipos |
+| Persistencia | PostgreSQL | Usuarios, runs, rankings. Estado de carrera como JSON |
+| Hosting | Railway (app + Postgres) | Revisable en [D-14](DECISIONS.md) |
+| E2E | Playwright | Flujos críticos, no simulación de balance |
+| Auth | **OPEN** ([D-12](DECISIONS.md)) | Necesaria para rankings oficiales |
+
+No usar Jest si Vitest cubre engine y unit tests. Un solo runner de unit/integration.
+
+## 3. Monorepo
+
+Gestor de paquetes recomendado: **pnpm workspaces**.
+
+```
+TheClutch/
+├── AGENTS.md
+├── README.md
+├── docs/                         # fuente de verdad
+├── .cursor/rules/                # reglas de agentes
+├── .cursor/skills/               # skills de especialistas
+├── packages/
+│   ├── engine/                   # simulación pura
+│   │   └── src/
+│   │       ├── rng/
+│   │       ├── state/            # CareerState, commands, reduce
+│   │       ├── player/           # generación, overall, archetypes
+│   │       ├── development/
+│   │       ├── simulation/       # game, season, awards
+│   │       ├── contracts/
+│   │       ├── draft/
+│   │       ├── events/           # evaluador, no textos
+│   │       ├── injuries/
+│   │       ├── legacy/
+│   │       └── index.ts
+│   ├── content/                  # datos: eventos, nombres, badges
+│   └── shared/                   # tipos Zod/TS compartidos (opcional al inicio)
+└── apps/
+    └── web/                      # Next.js
+        ├── app/                  # rutas UI + API
+        ├── components/
+        ├── server/               # db, auth, replay Daily
+        └── lib/                  # adapters, no reglas de juego
+```
+
+Hasta que exista código, esta estructura es el **mapa objetivo**. No crear features dentro de `apps/web` que pertenezcan a `packages/engine`.
+
+## 4. Separación del Game Engine
+
+### 4.1 Contrato público
+
+El engine expone un API pequeño:
+
+```ts
+createCareer(input: CreateCareerInput): CareerState
+dispatch(state: CareerState, command: Command): DispatchResult
+getViewModel(state: CareerState): CareerViewModel
+```
+
+- `createCareer` usa una seed para generar jugador + contexto inicial.
+- `dispatch` aplica **un** comando y devuelve estado nuevo + interrupciones de UI.
+- `getViewModel` proyecta estado interno a lo que la UI puede mostrar (respeta atributos ocultos).
+
+Nadie fuera del engine importa módulos internos (`simulation/season.ts`, etc.). Solo el barrel `index.ts`.
+
+### 4.2 RNG
+
+```ts
+type Rng = {
+  next(): number        // [0, 1)
+  fork(label: string): Rng
+}
+```
+
+- PRNG con seed (p.ej. mulberry32 + hash de string).
+- Cada subsistema hace `fork("injuries")`, `fork("games")`, para que añadir un evento no desplace toda la secuencia de lesiones.
+- El estado guarda `rngState` para replay.
+
+Ver [DAILY_MODE.md](DAILY_MODE.md) para seeds de jugador vs seeds de run.
+
+### 4.3 Estado y comandos
+
+`CareerState` es un documento versionado (`schemaVersion`). Se serializa entero a PostgreSQL.
+
+Comandos (lista inicial, PROVISIONAL):
+
+- `SIMULATE_NEXT` — avanza la temporada hasta un interrupt esporádico o el fin de fase
+- `RESOLVE_EVENT` — `{ eventId, optionId }`
+- `SET_TRAINING_FOCUS`
+- `ACCEPT_CONTRACT` / `REJECT_CONTRACT`
+- `DECLARE_DRAFT` / `WITHDRAW_DRAFT`
+- `REQUEST_TRADE`
+- `RESOLVE_TRADE` — aceptar o pelear un `system.traded`
+- `RETIRE` / `PLAY_ANOTHER_YEAR`
+
+La UI nunca muta `CareerState` a mano.
+
+### 4.4 Dónde corre
+
+| Contexto | Engine | Motivo |
+| --- | --- | --- |
+| Partida en el navegador | Sí | Latencia cero, sensación de juego |
+| API de submit Daily/Challenge | Sí (replay) | Anti-trampa: se reejecuta el log de comandos |
+| Tests / balance batches | Sí | Simular 10k carreras en Node |
+
+El servidor **no se fía** de un Legacy Score enviado por el cliente. Recibe `commands[]` y el `playerSeed`/`runSeed`, recrea y compara.
+
+### 4.5 Contenido
+
+`packages/content` exporta datos. El engine recibe los eventos como estructura ya parseada (inyección). Así se pueden testear eventos sin Next y se puede hot-reload de contenido más adelante.
+
+## 5. Modelo de datos persistido
+
+El engine vive en JSON. Postgres guarda metadatos y ranking.
+
+### 5.1 Tablas iniciales (PROVISIONAL)
+
+```
+users
+  id, display_name, created_at
+  auth_subject            -- depende de D-12
+
+career_runs
+  id
+  user_id                 -- nullable si invitados
+  mode                    -- free | daily | challenge
+  player_seed             -- seed de generación
+  run_seed                -- seed de RNG de partida
+  daily_date              -- si daily
+  challenge_code          -- si challenge
+  content_version
+  engine_version
+  schema_version
+  commands                -- JSON: Command[]
+  final_state             -- JSON opcional / o solo hash
+  legacy_score
+  is_official             -- primer intento daily, etc.
+  status                  -- in_progress | retired | abandoned
+  created_at, finished_at
+
+daily_definitions
+  date                    -- YYYY-MM-DD (UTC)
+  player_seed
+  snapshot                -- JSON del jugador inicial + world flavor
+  content_version
+
+leaderboard_entries
+  id
+  period                  -- daily:date | weekly:iso-week
+  user_id
+  run_id
+  legacy_score
+  unique (period, user_id) para oficial
+```
+
+No normalizar stats de cada partido en tablas relacionales en el MVP. Van dentro del estado JSON. Si más adelante hay perfil público rico, se materializan al retirar.
+
+### 5.2 Documento CareerState (resumen)
+
+Ver tipos canónicos en [PLAYER_MODEL.md](PLAYER_MODEL.md) y [CAREER_SYSTEM.md](CAREER_SYSTEM.md).
+
+Bloques:
+
+- `meta` (seeds, versiones, mode)
+- `player`
+- `world` (equipo actual, liga, coach abstracto, compañeros-sombra)
+- `calendar` (año, fase de temporada)
+- `season` (stats live)
+- `history` (temporadas, premios, equipos, lesiones, momentos)
+- `pendingInterrupt` (evento, oferta, draft, retiro)
+- `rng`
+
+## 6. Frontend
+
+- App Router. Rutas mínimas de MVP: landing, play, event, season-report, legacy.
+- Componentes tontos respecto al juego: reciben view models.
+- Un hook/store `useCareer()` habla con el engine en cliente y sincroniza al servidor en puntos de control (fin de temporada / fin de carrera). No cada comando, al menos al inicio.
+- Accesibilidad: targets 44px, contraste, no depender del color para rol/forma.
+
+## 7. Backend
+
+Responsabilidades:
+
+- Auth.
+- CRUD de runs (guardar log).
+- Materializar Daily a medianoche UTC (o on-demand con lock).
+- Replay + insert oficial de ranking.
+- Rate limit de submits.
+
+No:
+
+- Recalcular desarrollo con SQL.
+- Generar texto de eventos.
+
+## 8. Testing
+
+| Tipo | Dónde | Qué |
+| --- | --- | --- |
+| Unit | `packages/engine` | overall, RNG forks, development clamps, event matcher |
+| Simulación | `packages/engine` | 1k–10k carreras: distribuciones de OVR, PPG por posición, lesion rates |
+| Integration | `apps/web/server` | replay Daily, primer intento oficial |
+| E2E | Playwright | crear run, simular hasta evento, terminar carrera (happy path) |
+
+Un test de engine **no** debe montar React.
+
+## 9. Versionado
+
+Toda run guarda `engine_version` + `content_version`. Un cambio de fórmula no reescribe rankings pasados. Daily de un día usa las versiones vigentes ese día.
+
+## 10. Seguridad (Daily)
+
+Asumir cliente hostil.
+
+- El score oficial sale del replay servidor.
+- Rechazar logs imposibles (comando cuando no hay interrupt de ese tipo).
+- Limitar longitud de `commands[]`.
+- Idempotencia del primer intento.
+
+No es anti-cheat de nivel competitivo AAA. Es suficiente para un ranking casual honesto.
+
+## 11. Lo que no entra en arquitectura todavía
+
+- Microservicios.
+- Cola de jobs pesada (un cron/worker para daily basta).
+- Simulación distribuida.
+- CMS de eventos con UI admin (los eventos viven en git al inicio).

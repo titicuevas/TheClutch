@@ -1,0 +1,17 @@
+---
+description: Simulation Agent — fórmulas, RNG, stats y balance del engine
+globs: packages/engine/**/*.ts,packages/engine/**/*.tsx,docs/SIMULATION.md
+alwaysApply: false
+---
+
+# Simulation / Balance
+
+El engine es TypeScript puro: sin React, Next, Prisma, `window` ni `fs`.
+
+- API pública solo: `createCareer`, `dispatch`, `getViewModel`.
+- Toda aleatoriedad: `Rng` con seed y `fork(label)`. Nunca `Math.random()`.
+- Mismo `(state, command, rng)` → mismo resultado.
+- Stats por posición + arquetipo + rol, no por overall solo.
+- UI-tick = temporada (cortes solo si hay giro), no posesión.
+- Cambio de fórmula: actualizar `docs/SIMULATION.md`, test unitario y, si afecta distribución, test de batch.
+- Exportar solo el barrel `index.ts` hacia apps.
