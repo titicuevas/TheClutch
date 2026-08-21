@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 42% at 50% -8%, rgba(226, 61, 45, 0.18), transparent 52%),
+    radial-gradient(ellipse 80% 36% at 50% 108%, rgba(232, 184, 74, 0.08), transparent 48%),
+    radial-gradient(900px 420px at 50% 0%, rgba(232, 184, 74, 0.07), transparent 58%),
+    #08090c;
+  color: #f4ead6;
+}
+
+.court-grid {
+  background-image:
+    radial-gradient(ellipse 42% 18% at 50% -2%, rgba(226, 61, 45, 0.12), transparent 70%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 46px,
+      rgba(244, 234, 214, 0.028) 46px,
+      rgba(244, 234, 214, 0.028) 47px
+    );
+}
+
+.surface {
+  background: linear-gradient(180deg, rgba(244, 234, 214, 0.04), transparent 28%), #14161c;
+  box-shadow:
+    inset 0 1px 0 rgba(244, 234, 214, 0.07),
+    0 18px 40px rgba(0, 0, 0, 0.38);
+}
+
+.jersey-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 22px 48px rgba(0, 0, 0, 0.48);
+}
+
+.btn-primary {
+  min-height: 44px;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #ef5344 0%, #e23d2d 48%, #c43224 100%);
+  color: #f4ead6;
+  font-weight: 600;
+  box-shadow:
+    0 10px 28px rgba(226, 61, 45, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-option {
+  min-height: 44px;
+  border: 1px solid #2a2e38;
+  background: rgba(8, 9, 12, 0.72);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.btn-option:hover,
+.btn-option:focus-visible {
+  border-color: rgba(232, 184, 74, 0.55);
+  background: rgba(232, 184, 74, 0.08);
+}
+
+@keyframes recap-beat {
+  0% {
+    transform: scale(0.97);
+    opacity: 0.35;
+  }
+  55% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.recap-beat {
+  animation: recap-beat 0.7s ease-out;
+}
+
+.recap-beat-mark {
+  display: inline-block;
+  animation: recap-beat 0.7s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recap-beat,
+  .recap-beat-mark {
+    animation: none;
+  }
+
+  .btn-primary:active {
+    transform: none;
+  }
+}
+
+:is(a, button):focus-visible {
+  outline: 2px solid #e8b84a;
+  outline-offset: 2px;
+}

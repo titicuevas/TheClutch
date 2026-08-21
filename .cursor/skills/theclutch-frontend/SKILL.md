@@ -8,8 +8,8 @@ description: >-
 
 # Frontend / UI Agent
 
-1. Lee `docs/GAME_DESIGN.md` §12 y `docs/ARCHITECTURE.md` §6.
-2. View models del engine. Cero fórmulas de juego en componentes.
+1. Lee `docs/rules/GAME_DESIGN.md` §12 y `docs/architecture/ARCHITECTURE.md` §6.
+2. View models del engine. Cero fórmulas de juego en componentes (DRY).
 3. Una CTA por pantalla. Ocultar potencial exacto.
 4. Mobile-first, targets 44px, carta de legacy screenshot-friendly.
 5. No importes internals de `packages/engine`.

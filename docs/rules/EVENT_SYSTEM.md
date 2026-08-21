@@ -36,7 +36,7 @@ type EventOption = {
 }
 ```
 
-Idioma: **OPEN** [D-13](DECISIONS.md). Las plantillas serán `es` y/o `en` desde el día uno a nivel de esquema, aunque solo se rellene uno.
+Idioma: **OPEN** [D-13](../decisiones/DECISIONS.md). Las plantillas serán `es` y/o `en` desde el día uno a nivel de esquema, aunque solo se rellene uno.
 
 ## 3. Condiciones
 
@@ -88,7 +88,7 @@ Lista cerrada en MVP (añadir un efecto = cambio LOCKED de este doc):
 - `nudgeRole` (como mucho un escalón, sujeto a reglas de equipo)
 - `injure` / `progressInjury` / `heal`
 - `addMoment` (para legacy card)
-- `modifyEarnings` (bonus, multa) — usar con cautela
+- `modifyEarnings` (bonus, multa) / `spent` de lifestyle — usar con cautela; no un wallet
 - `weightNextOffers` (preferencia de mercado)
 - `draftDeclare` (atajo; preferible comando explícito)
 - `retirePrompt`
@@ -114,7 +114,7 @@ El engine simula la temporada. En **pocos** puntos internos de chequeo (no panta
 
 **LOCKED:** máximo **1 evento de decisión esporádico** por temporada regular. Una lesión puede ocupar ese slot (o ser el único corte). Offseason estructural (contrato/draft) no cuenta como ese slot.
 
-**PROVISIONAL:** `noEventWeight` calibrado para ~1 giro cada 3 temporadas a nivel de carrera, más frecuente cuando el estado es dramático (banco con OVR alto, último año de contrato, draft frontera, fatiga extrema). Estado tranquilo → casi nunca evento. Ver [GAME_DESIGN.md](GAME_DESIGN.md) §9.
+**PROVISIONAL:** `noEventWeight` calibrado para ~1 giro cada 3 temporadas a nivel de carrera, más frecuente cuando el estado es dramático (banco con OVR alto, último año de contrato, draft frontera, fatiga extrema). Estado tranquilo → casi nunca evento. Tras `SPORADIC_MUST_CAP` (8) giros resueltos, los musts de sabor (afición, lifestyle, declive, prensa, voz de franquicia…) dejan de ser obligatorios; salud, trade involuntario, snub de recap, finales y `go_home` sí. Ver [GAME_DESIGN.md](GAME_DESIGN.md) §9.
 
 Toasts de flavor (`"{team} gana de 20"`) no son eventos y no paran el flujo. Si se usan, van en el resumen.
 
@@ -149,18 +149,38 @@ Objetivo: **20–40 eventos** de alta calidad, no 400 mediocres.
 | --- | --- | --- |
 | `unhappy_minutes` | banco + OVR > starter + morale baja | el ejemplo canónico |
 | `coach_trust` | buena racha + coachRelation alta | refuerzo positivo |
+| `coach_clash` | titular+, míster frío (≤38), moral no hundida; una vez | espejo de `coach_trust`. Parchear recorta el tramo; plantar cara sube minutos y quema. Si el club entero está `cold`, gana `home_crowd`. Banco sigue siendo `unhappy_minutes` |
 | `media_overrate` | stats altas en liga menor | ego / reputación |
-| `lockout_fatigue` | fatigue alta mid-season | gestión de salud |
-| `early_return` | lesión moderate, ego o ambition altos | riesgo vs recompensa |
-| `hometown_discount` | oferta menor, loyalty alta | One Club seed sin ser modo |
+| `media_heat` | titular+ en `american_league`, OVR ≥ 76, ≥18 PTS a mitad; una vez | la prensa del techo. Alimentar el circo (uso, ego) vs cortar el micro. No es `media_overrate` |
+| `lockout_fatigue` | fatigue alta mid-season | gestión de salud; recorta minutos del resto del año |
+| `early_return` | lesión moderate, ego o ambition altos | riesgo vs recompensa. Título: `La rodilla` si type=knee; si no `El cuerpo` |
+| `hometown_discount` | contrato acaba + loyalty alta | variante estructural de mercado; One Club seed sin ser modo |
 | `contender_call` | oferta de equipo top, rol peor | anillos vs uso |
-| `draft_pressure` | eligible + stock frontera | tensionar D-05 |
-| `agent_conflict` | professionalism baja o salario percibido bajo | |
-| `teammate_star_clash` | otro star en equipo, ego alto | |
-| `national_snub` | OVR alto no convocado | |
-| `work_summer` | offseason, workEthic | |
-| `traded_involuntary` | american_league + motivo (tank, contrato, request) | sistema/giro; no spam. Ver CAREER_SYSTEM §4.3 |
-| `award_snub` | pool de MVP/All-Team y no salió | offseason; ego / work ethic / tradeRequest |
+| `draft_pressure` | eligible + stock frontera | misma decisión de draft, copy y filo distintos |
+| `agent_conflict` | professionalism baja o salario percibido bajo | puede marcar tradeRequest |
+| `teammate_star_clash` | otro star en el locker (OVR ≥ 82), ego alto | dos carteles; nombra al shadow. Compartir vs exigir el uso |
+| `locker_ice` | titular+, vestuario frío (≤38), míster no; ego bajo; una vez | el locker te deja solo. Pegarte recorta el tramo; pedir el balón sube minutos. No pisa `coach_clash` ni `home_crowd` |
+| `locker_voice` | `franchise_player` + titular+, fatiga < 58; una vez | la cara lleva el vestuario o sigue de estrella. Más uso y carga vs locker frío. Gana a `home_crowd` y `locker_ice`. No es `teammate_star_clash` |
+| `vet_minutes` | sexto o rotación, edad ≥ 28, 6+ años, mismo club el año anterior; una vez | hay un chico pidiendo tu uso. Ceder vs agarrarte. Banco gordo sigue siendo `unhappy_minutes`. No dispara el año que cambias de club |
+| `role_slide` | titular+, edad ≥ 32, 8+ años; una vez | declive: el staff quiere sentarte. Aceptar vs pelear el rol. No es el prompt de retiro. Sexto/rotación sigue siendo `vet_minutes` |
+| `finals_hangover` | titular+, el recap fue `finals`; una vez | perder el anillo. Repetir vs pedir el cambio. No es `contender_call` (eso es otra camiseta). El anillo no pregunta |
+| `national_snub` | Recap con `national.status = snub` | offseason; solo si hubo ventana y no convocaron |
+| `national_duty` | offseason de Juegos o Mundial, OVR ≥ 80; una vez | ir a la selección vs saltarte el verano. No es el snub. El continental no pregunta. Si te quedas, el recap es `declined` |
+| `work_summer` | offseason, workEthic, edad ≥ 24 | gym vs descanso; no sustituye el training joven |
+| `traded_involuntary` | american_league + motivo (tank, coach, request). `full` o star/franchise lo bloquean salvo `tradeRequest` | sistema/giro; no spam. Ver CAREER_SYSTEM §4.3 |
+| `award_snub` | recap con `awardSnub` (pool de MVP/All-Team/POTY y no salió) | offseason esporádico; ego / confianza / prensa |
+| `lifestyle_pressure` | titular+ con morale baja, no lockout | D-24: presión/aislamiento. Recorta minutos si bajas revoluciones. Copy de carrera, no clínico |
+| `home_crowd` | titular+, 2+ años, chip `loved` o `cold`; una vez | D-23: la grada canta o pita. Más uso vs vestuario; o ganar la pista vs pedir el cambio. Si el club está `ok`, no sale. Gana a `lifestyle_pressure` cuando el vestuario entero está frío |
+| `rival_heat` | a mitad, el rival sombra te está comiendo en PTS | el sombra muerde; cazarle sube uso y fatiga |
+| `go_home` | veterano titular+ en `american_league`, no USA, lealtad alta o moral baja | volver a la liga de origen. Una vez. Más rol, menos sueldo |
+| `leaving_home` | 3+ temporadas en un club (no formación) y 1 en otro; una vez | el club viejo sigue escribiendo. Cerrar capítulo vs no olvidar. Enfría el chip si te quedas anclado (D-23) |
+| `lifestyle_flex` | titular+ , edad ≥ 26, sueldo ≥ 18; una vez | casa/coche vs seguir liviano. Gasta unidades; no es tienda |
+| `play_through` | lesión `minor` a mitad y ego o ambition ≥ 62 | el golpe. Jugarla vs sentarte el tramo. No es must: `moderate` + ego ≥ 68 sigue siendo `early_return` |
+| `load_manage` | rol `franchise`, contention ≥ 78, fatiga < 58; una vez | Mayo vs cada noche. El recorte de cuerpo sigue siendo `lockout_fatigue`. Titular o estrella no lo ve |
+| `captain_c` | rol `franchise`, 8+ años, chip `loved`; una vez | el brazalete. Llevarla vs uno más. No es `locker_voice` (eso es a mitad). Estrella sin la C de club no lo ve |
+| `sixth_heat` | `sixth_man`, edad ≤ 25, ≥15 PTS a mitad; una vez | pedir el cinco vs seguir de bomba. Banco gordo sigue `unhappy_minutes`; veterano ≥ 28 sigue `vet_minutes`. No es must |
+| `deal_year` | titular o estrella, último año, ego o ambition ≥ 62, no formación; una vez | jugarlo vs forzar la salida a mitad. El mercado estructural no lo sustituye. No es `agent_conflict` |
+| `playoff_push` | titular o estrella, contention ≥ 80, fatiga media; una vez | cargar vs guardar piernas. Franquicia en Mayo sigue siendo `load_manage`. Fatiga extrema sigue `lockout_fatigue`. No es must |
 
 Cada evento nuevo: archivo en `packages/content/events/`, tests de condición, y una línea en este catálogo o un índice generado. No copypastear 50 variantes que son el mismo evento con otro adjetivo.
 

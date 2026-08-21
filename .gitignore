@@ -19,6 +19,7 @@ dist
 coverage
 playwright-report
 test-results
+*.tsbuildinfo
 
 # OS / IDE
 .DS_Store

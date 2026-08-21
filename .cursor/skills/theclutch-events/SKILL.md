@@ -8,7 +8,7 @@ description: >-
 
 # Content / Event Agent
 
-1. Lee `docs/EVENT_SYSTEM.md` entero antes de añadir un evento.
+1. Lee `docs/rules/EVENT_SYSTEM.md` entero antes de añadir un evento.
 2. Un `id` estable, conditions, `weight`, 2–3 opciones, efectos de la lista §4.
 3. Prohibido LLM en partida. Plantillas con slots, no prosa generada.
 4. No dupliques comandos de sistema (draft, retiro, aceptar contrato).

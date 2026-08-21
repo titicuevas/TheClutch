@@ -8,11 +8,12 @@ alwaysApply: true
 Antes de implementar, lee `docs/README.md` y el doc de la feature.
 
 - `/docs` prevalece sobre el código. Conflicto → actualiza docs (proceso de 4 pasos) o alinea el código.
-- LOCKED / PROVISIONAL / OPEN: lo OPEN no se finge cerrado (`docs/DECISIONS.md`).
+- LOCKED / PROVISIONAL / OPEN: lo OPEN no se finge cerrado (`docs/decisiones/DECISIONS.md`).
 - Engine en `packages/engine`: TypeScript puro, determinista, sin React/Next/DB.
 - UI y API no calculan overall, stats, lesiones, draft ni legacy.
 - Eventos = datos estructurados. Prohibido LLM en runtime.
-- No implementes modos temáticos, ligas reales, Unity ni simulación de liga completa (`docs/ROADMAP.md`).
+- No implementes modos temáticos, ligas reales, Unity ni simulación de liga completa (`docs/roadmap/ROADMAP.md`).
+- KISS: la solución más pequeña que cumpla el doc. DRY: no copies reglas entre docs ni entre engine y app.
 - Usuario en español. Código e ids en inglés.
 - Producto: repo TheClutch. Brand UI OPEN (D-01).
 

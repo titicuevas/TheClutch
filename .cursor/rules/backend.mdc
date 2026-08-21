@@ -10,7 +10,7 @@ No reimplementes reglas de juego. Importa `packages/engine`.
 
 - Daily/Challenge: replay del `commands[]` en servidor; no confíes el score del cliente.
 - Persiste seeds, versiones (`engine`, `content`, `schema`) y el log. Estado = JSON versionado.
-- Primer intento Daily oficial: `docs/DAILY_MODE.md`.
+- Primer intento Daily oficial: `docs/rules/DAILY_MODE.md`.
 - `playerSeed` ≠ `runSeed`. No mezclarlas.
 - Auth solo cuando D-12 esté cerrado. Fase 1–3 pueden vivir sin ranking.
-- Nunca calcules desarrollo, lesiones o legacy en SQL.
+- DRY: llama al engine; no reescribas desarrollo/legacy en SQL.

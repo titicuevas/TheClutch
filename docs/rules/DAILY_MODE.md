@@ -17,36 +17,34 @@ Hay dos semillas distintas. No mezclarlas.
 | Seed | Determina | Compartida |
 | --- | --- | --- |
 | `playerSeed` | país, edad, altura, posición, equipo inicial, arquetipo, atributos, potencial, personalidad, contexto | sí (Daily / Challenge) |
-| `runSeed` | RNG de simulación (partidos, lesiones, ofertas concretas, orden de eventos candidatos) | no, salvo [D-06](DECISIONS.md) |
+| `runSeed` | RNG de simulación (partidos, lesiones, ofertas concretas, orden de eventos candidatos) | no, salvo [D-06](../decisiones/DECISIONS.md) |
 
 ### 2.1 Daily playerSeed
 
 ```
-playerSeed = hash("theclutch:daily:" + YYYY-MM-DD + ":" + contentVersion)
+playerSeed = "theclutch:daily:" + YYYY-MM-DD + ":" + contentVersion
 ```
 
 Fecha en **UTC**. El Daily cambia a las 00:00 UTC. Documentar en UI el reset.
 
-`daily_definitions` materializa el snapshot para no depender de un cambio accidental de generador a mitad del día: si se despliega un bugfix de generación, el Daily ya publicado permanece. Los días nuevos usan el generador nuevo.
+El código compacto (`BK1-D-YYMMDD`) es el Challenge-equivalent de esa clave, no un hash irreversible. Así el mismo día produce el mismo jugador y el código se puede pegar.
+
+`daily_definitions` materializa el snapshot para no depender de un cambio accidental de generador a mitad del día: si se despliega un bugfix de generación, el Daily ya publicado permanece. Los días nuevos usan el generador nuevo. Sin Postgres (Fase 4 local) no hay snapshot: el generador vigente es la verdad de ese día.
 
 ### 2.2 Challenge code
 
-Formato objetivo (PROVISIONAL):
+Dos formas (PROVISIONAL), ambas versionadas `BK1-…`. Caracteres unívocos (sin 0/O mezclados en el payload: alfabeto Crockford).
 
-```
-BK-7H42-K9P1
-```
-
-- Prefijo `BK` (basket). Ajustable con el brand.
-- Caracteres unívocos (evitar 0/O, 1/I).
-- El código **es** la playerSeed (o un encoding de 64 bit).
-- Versionar: si el generador cambia, o bien el código incluye versión (`BK1-…`) o los códigos viejos se marcan incompatibles.
+| Forma | Qué codifica | Ejemplo |
+| --- | --- | --- |
+| `BK1-D-YYMMDD` | Daily de esa fecha UTC | `BK1-D-260821` |
+| `BK1-X-…` | playerSeed + identidad ligera de Free (posición, país, mano, nombre) | sale de **Copiar ficha** |
 
 Un usuario comparte el código, no su `runSeed`. Frase de producto:
 
 > Intenta hacer una carrera mejor que la mía con este jugador.
 
-Eso implica **mismo jugador, distinta suerte**, salvo que cerremos D-06 en modo "RNG locked".
+Challenge **asigna** esa carta: sin creador, sin **Otra carta**. Daily sigue ignorando el menú (D-02). Eso implica **mismo jugador, distinta suerte**, salvo que cerremos D-06 en modo "RNG locked".
 
 ## 3. Qué queda fijado por playerSeed
 
@@ -72,7 +70,7 @@ Así, "las mismas condiciones iniciales" se cumple sin clonar la carrera entera.
 Daily:
 
 - `is_official = true` solo el **primer** `career_runs` terminado (retired) de ese `user_id` + `daily_date`.
-- Abandonar a mitad: **OPEN** si consume el intento [D-11](DECISIONS.md). Recomendación: el intento se consume al **primer `SIMULATE_NEXT`**, no al abrir la carta. Así no pisa un mis-tap, pero tampoco permite scouting infinito.
+- Abandonar a mitad: **OPEN** si consume el intento [D-11](../decisiones/DECISIONS.md). Recomendación: el intento se consume al **primer `SIMULATE_NEXT`**, no al abrir la carta. Así no pisa un mis-tap, pero tampoco permite scouting infinito.
 - Replays no oficiales: mismo `playerSeed`, `runSeed` nuevo, no escriben leaderboard.
 
 Challenge:
@@ -90,12 +88,12 @@ POST /runs/submit
 Servidor:
 
 1. Verifica seed (Daily date coincide con snapshot; Challenge parseable).
-2. `createCareer` + reduce `commands`.
-3. Comprueba que cada comando era legal en ese estado.
-4. Calcula `legacy_score`.
+2. `createCareer` + `replay(input, commands)`.
+3. Comprueba que cada comando era legal (`replay` falla si no).
+4. Calcula `legacy_score` del report del engine.
 5. Si official slot libre, inserta leaderboard.
 
-Rechazar si `commands.length` es absurdo o `engine_version` no coincide con la permitida ese día.
+Rechazar si `commands.length` > `MAX_COMMANDS` (400) o `engine_version` no coincide con la permitida ese día. El cliente no envía el score: sale del replay.
 
 ## 6. Rankings
 
@@ -107,7 +105,7 @@ Mostrar: puesto, nombre, peak OVR, un título resumen, score. No hace falta la c
 
 ### 6.2 Semanal
 
-**OPEN** la métrica [D-15](DECISIONS.md). Candidatos:
+**OPEN** la métrica [D-15](../decisiones/DECISIONS.md). Candidatos:
 
 - suma de dailies oficiales de la semana ISO;
 - media;
@@ -128,10 +126,24 @@ Si en playtest el top 10 es indistinguible de "no me lesié", subir el peso de d
 ## 8. UI mínima
 
 - Countdown al próximo Daily.
-- Carta de "hoy toca: SF Sharpshooter, 18, 198 cm, …" sin revelar potencial.
-- Banner de intento oficial vs fun run.
-- Al terminar: score, percentil del día (si n ≥ umbral; si no, "ranking en construcción"), share, Challenge-equivalent del daily (`playerSeed` encodeado) para retar a un amigo con el jugador de hoy.
+- Carta de "hoy toca: SF Tirador, 18, 198 cm, …" sin revelar potencial.
+- Banner de intento del día vs por diversión.
+- Al terminar: score, Challenge-equivalent (`BK1-D-YYMMDD`) para retar a un amigo con el jugador de hoy.
+- Percentil del día **solo** cuando hay ranking servidor y n ≥ umbral ([D-17](../decisiones/DECISIONS.md)). Sin cuentas: no se finge un top 4%.
 
 ## 9. Privacidad
 
 Leaderboard: display name, no email. Poder no aparecer (**OPEN**, nice-to-have post-MVP).
+
+## 10. Cliente sin cuentas (primer corte Fase 4)
+
+**PROVISIONAL** hasta cerrar [D-12](../decisiones/DECISIONS.md).
+
+Se puede jugar el Daily y un Challenge **en el navegador**, con el mismo engine que Free:
+
+- `playerSeed` y `runSeed` separados. Daily **ignora** el creador (D-02). Challenge asigna la carta del código (Daily o ficha Free). No hay **Otra carta**.
+- El primer `SIMULATE_NEXT` de `/play?mode=daily` marca el intento del día en `localStorage`. Otra suerte = nuevo `runSeed`, mismo jugador, banner de diversión.
+- Challenge: pegar `BK1-D-YYMMDD` (Daily) o `BK1-X-…` (ficha Free). No consume el intento del día.
+- El estado guarda `meta.commands`. `replay` en el engine reproduce la run y rechaza ilegales. Aún **no** hay POST `/runs/submit`.
+- **No** hay leaderboard ni percentil. El score de la carta no es oficial hasta que un servidor llame a `replay`.
+- Ranking y auth quedan para el siguiente corte de Fase 4. No implementar scores falseables como si fueran ranking.

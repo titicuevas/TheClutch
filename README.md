@@ -8,19 +8,20 @@ El usuario no controla los partidos. Toma decisiones. El motor simula la carrera
 
 ## Estado
 
-Fase 1 en curso: hay un **vertical slice del engine** (sin UI). Genera un jugador por seed, simula temporadas y imprime un legacy en consola.
+**Alpha de la carrera** (Fase 3) + **Daily/Challenge locales** (primer corte Fase 4): jugable en el navegador (`pnpm dev`). Sin cuentas, sin ranking, sin cloud. El Daily del día es el mismo jugador para todos; el score no es oficial.
 
 La fuente de verdad está en [`/docs`](docs/README.md).
 
-## Probar el motor
+## Probar
 
 ```bash
 pnpm install
-pnpm test
-pnpm sim -- --seed demo-01
+pnpm dev
 ```
 
-Misma `--seed` = mismo jugador. `--run` distinta = misma carta, otra suerte de temporada.
+Abre [http://localhost:3000](http://localhost:3000) y empieza una carrera. La UI Free no pide seed.
+
+Motor en consola (sin UI): `pnpm sim -- --seed demo-01`
 
 ## Stack previsto
 
@@ -28,10 +29,13 @@ Next.js · React · TypeScript · Tailwind CSS · PostgreSQL · engine TS desaco
 
 ## Documentos
 
-- [Game Design](docs/GAME_DESIGN.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Decisiones pendientes](docs/DECISIONS.md)
+Índice: [`docs/README.md`](docs/README.md)
+
+- [Rules / game design](docs/rules/GAME_DESIGN.md)
+- [Architecture](docs/architecture/ARCHITECTURE.md)
+- [Models](docs/models/PLAYER_MODEL.md)
+- [Roadmap](docs/roadmap/ROADMAP.md)
+- [Decisiones pendientes](docs/decisiones/DECISIONS.md)
 
 ## Agentes
 

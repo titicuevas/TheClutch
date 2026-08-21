@@ -8,7 +8,7 @@ Estado: **PROVISIONAL** para el MVP. Los principios de separación engine/UI son
 2. Dado `(state, command, rng)`, el engine es **determinista**.
 3. La UI no calcula overall, stats, lesiones ni legacy. Solo muestra view models.
 4. El backend no reimplementa reglas de juego. Llama al mismo package `engine`.
-5. `/docs` manda sobre el código. El código no inventa reglas.
+5. `/docs` manda sobre el código. El código no inventa reglas. KISS/DRY: [docs/README.md](../README.md).
 6. Mobile-first. Web app, no motor 3D.
 
 ## 2. Stack propuesto
@@ -20,9 +20,9 @@ Estado: **PROVISIONAL** para el MVP. Los principios de separación engine/UI son
 | Engine | TypeScript (package propio) | Vitest |
 | Contenido | JSON/YAML versionado en `packages/content` | Eventos, nombres, arquetipos |
 | Persistencia | PostgreSQL | Usuarios, runs, rankings. Estado de carrera como JSON |
-| Hosting | Railway (app + Postgres) | Revisable en [D-14](DECISIONS.md) |
+| Hosting | Railway (app + Postgres) | Revisable en [D-14](../decisiones/DECISIONS.md) |
 | E2E | Playwright | Flujos críticos, no simulación de balance |
-| Auth | **OPEN** ([D-12](DECISIONS.md)) | Necesaria para rankings oficiales |
+| Auth | **OPEN** ([D-12](../decisiones/DECISIONS.md)) | Necesaria para rankings oficiales |
 
 No usar Jest si Vitest cubre engine y unit tests. Un solo runner de unit/integration.
 
@@ -35,6 +35,12 @@ TheClutch/
 ├── AGENTS.md
 ├── README.md
 ├── docs/                         # fuente de verdad
+│   ├── architecture/
+│   ├── models/
+│   ├── rules/
+│   ├── roadmap/
+│   ├── agents/
+│   └── decisiones/
 ├── .cursor/rules/                # reglas de agentes
 ├── .cursor/skills/               # skills de especialistas
 ├── packages/
@@ -61,7 +67,7 @@ TheClutch/
         └── lib/                  # adapters, no reglas de juego
 ```
 
-Hasta que exista código, esta estructura es el **mapa objetivo**. No crear features dentro de `apps/web` que pertenezcan a `packages/engine`.
+El engine vive en `packages/engine`. No crear features de juego dentro de `apps/web`.
 
 ## 4. Separación del Game Engine
 
@@ -72,11 +78,13 @@ El engine expone un API pequeño:
 ```ts
 createCareer(input: CreateCareerInput): CareerState
 dispatch(state: CareerState, command: Command): DispatchResult
+replay(input: CreateCareerInput, commands: Command[]): ReplayResult
 getViewModel(state: CareerState): CareerViewModel
 ```
 
 - `createCareer` usa una seed para generar jugador + contexto inicial.
-- `dispatch` aplica **un** comando y devuelve estado nuevo + interrupciones de UI.
+- `dispatch` aplica **un** comando y devuelve estado nuevo + `applied`. Un comando ilegal no muta el juego (`applied: false`). Los aplicados van a `meta.commands`.
+- `replay` reduce el log desde `createCareer`. Falla si un comando es ilegal o el log supera `MAX_COMMANDS`. El servidor Daily llamará esto; no se fía de un score del cliente.
 - `getViewModel` proyecta estado interno a lo que la UI puede mostrar (respeta atributos ocultos).
 
 Nadie fuera del engine importa módulos internos (`simulation/season.ts`, etc.). Solo el barrel `index.ts`.
@@ -94,7 +102,7 @@ type Rng = {
 - Cada subsistema hace `fork("injuries")`, `fork("games")`, para que añadir un evento no desplace toda la secuencia de lesiones.
 - El estado guarda `rngState` para replay.
 
-Ver [DAILY_MODE.md](DAILY_MODE.md) para seeds de jugador vs seeds de run.
+Ver [DAILY_MODE.md](../rules/DAILY_MODE.md) para seeds de jugador vs seeds de run.
 
 ### 4.3 Estado y comandos
 
@@ -111,7 +119,7 @@ Comandos (lista inicial, PROVISIONAL):
 - `RESOLVE_TRADE` — aceptar o pelear un `system.traded`
 - `RETIRE` / `PLAY_ANOTHER_YEAR`
 
-La UI nunca muta `CareerState` a mano.
+La UI nunca muta `CareerState` a mano. `meta.commands` lo escribe `dispatch`.
 
 ### 4.4 Dónde corre
 
@@ -130,6 +138,8 @@ El servidor **no se fía** de un Legacy Score enviado por el cliente. Recibe `co
 ## 5. Modelo de datos persistido
 
 El engine vive en JSON. Postgres guarda metadatos y ranking.
+
+MVP cliente (PROVISIONAL, [D-18](../decisiones/DECISIONS.md)): `apps/web` guarda el `CareerState` en `localStorage` (`theclutch:s{schema}:{seed}:…` en Free; `theclutch:s{schema}:daily|{challenge}:…` en Daily/Challenge). Un refresh reanuda la misma run. El intento Daily del día es una clave local; **no** es ranking. Cloud y replay quedan para auth.
 
 ### 5.1 Tablas iniciales (PROVISIONAL)
 
@@ -175,7 +185,7 @@ No normalizar stats de cada partido en tablas relacionales en el MVP. Van dentro
 
 ### 5.2 Documento CareerState (resumen)
 
-Ver tipos canónicos en [PLAYER_MODEL.md](PLAYER_MODEL.md) y [CAREER_SYSTEM.md](CAREER_SYSTEM.md).
+Ver tipos canónicos en [PLAYER_MODEL.md](../models/PLAYER_MODEL.md) y [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md).
 
 Bloques:
 
@@ -190,10 +200,10 @@ Bloques:
 
 ## 6. Frontend
 
-- App Router. Rutas mínimas de MVP: landing, play, event, season-report, legacy.
+- App Router. Rutas mínimas de MVP: landing (Daily + Free), play (`mode=free|daily|challenge`), season-report, legacy.
 - Componentes tontos respecto al juego: reciben view models.
 - Un hook/store `useCareer()` habla con el engine en cliente y sincroniza al servidor en puntos de control (fin de temporada / fin de carrera). No cada comando, al menos al inicio.
-- Accesibilidad: targets 44px, contraste, no depender del color para rol/forma.
+- Accesibilidad: targets 44px, contraste, foco visible, no depender del color para rol/forma. Móvil y tablet: una columna; las decisiones son la misma carta, no un menú extra.
 
 ## 7. Backend
 

@@ -7,9 +7,9 @@ function growthFactor(player: Player): number {
   const { age, growthCurve, workEthic } = player;
   const ethic = 0.7 + workEthic / 250;
   let base = 0;
-  if (age <= 21) base = 2.4;
-  else if (age <= 24) base = 1.6;
-  else if (age <= 27) base = 0.7;
+  if (age <= 21) base = 2.7;
+  else if (age <= 24) base = 1.85;
+  else if (age <= 27) base = 0.85;
   else if (age <= 31) base = 0.15;
   else base = -1.1;
 
@@ -30,8 +30,9 @@ export function developPlayer(player: Player, rng: Rng): Player {
 
   const nextAttrs = mapAttributes(player.attributes, (key, value) => {
     if (factor >= 0) {
-      const bump = factor * (0.35 + rng.next() * 0.9);
-      const towardCap = room > 0 ? bump : bump * 0.15;
+      const bump = factor * (0.4 + rng.next() * 0.95);
+      const hunger = room > 0 ? 1 + Math.min(0.45, room / 36) : 0.12;
+      const towardCap = bump * hunger;
       return value + towardCap;
     }
     const extra = REGRESSION_KEYS.includes(key) ? factor * 1.4 : factor * 0.6;

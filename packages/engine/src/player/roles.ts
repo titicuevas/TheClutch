@@ -1,4 +1,4 @@
-import type { Archetype, Position, Role } from "../state/types";
+import type { Archetype, Player, Position, Role } from "../state/types";
 
 const ARCHETYPES_BY_POSITION: Record<Position, Archetype[]> = {
   PG: ["playmaker", "slasher", "sharpshooter", "two_way", "all_around"],
@@ -22,21 +22,50 @@ const ROLE_MINUTES: Record<Role, [number, number]> = {
   franchise: [34, 38],
 };
 
-export function minutesForRole(role: Role): number {
+export function minutesBandForRole(role: Role): { min: number; max: number } {
   const [min, max] = ROLE_MINUTES[role];
+  return { min, max };
+}
+
+export function minutesForRole(role: Role): number {
+  const { min, max } = minutesBandForRole(role);
   return (min + max) / 2;
 }
 
-export function roleFromOverall(overall: number, age: number): Role {
-  if (age <= 20 && overall < 74) {
-    if (overall < 66) return "prospect";
+/** Uso de balón. SIMULATION.md §6: PTS/AST = minutos × overall × uso. */
+export const ROLE_USAGE: Record<Role, number> = {
+  prospect: 0.68,
+  bench: 0.74,
+  rotation: 0.82,
+  sixth_man: 0.9,
+  starter: 1,
+  star: 1,
+  franchise: 1.22,
+};
+
+export function usageForRole(role: Role): number {
+  return ROLE_USAGE[role];
+}
+
+export function roleFromOverall(overall: number, age: number, bias = 0): Role {
+  const shifted = overall + bias * 4;
+  if (age <= 20 && shifted < 74) {
+    if (shifted < 66) return "prospect";
     return "bench";
   }
-  if (overall >= 90) return "franchise";
-  if (overall >= 84) return "star";
-  if (overall >= 78) return "starter";
-  if (overall >= 74) return "sixth_man";
-  if (overall >= 70) return "rotation";
-  if (overall >= 64) return "bench";
+  if (shifted >= 90) return "franchise";
+  if (shifted >= 84) return "star";
+  if (shifted >= 78) return "starter";
+  if (shifted >= 74) return "sixth_man";
+  if (shifted >= 70) return "rotation";
+  if (shifted >= 64) return "bench";
   return "prospect";
+}
+
+/** El coach puede sentarte aunque el overall pida más minutos. */
+export function roleForAppearance(player: Player, overall: number): Role {
+  let bias = player.roleBias;
+  if (player.coachRelation < 35) bias -= 2;
+  else if (player.coachRelation < 50) bias -= 1;
+  return roleFromOverall(overall, player.age, bias);
 }

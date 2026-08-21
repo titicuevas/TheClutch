@@ -42,7 +42,9 @@ Un jugador está en **un club** y opcionalmente en **una competición continenta
 | 3 | continental | 1.0 | |
 | 4 | american_league | 1.15 | el techo de prestigio del MVP |
 
-Pesos a calibrar. Dirección: no debe ser óptimo eternizarse en tier 1 inflando 28 PPG. Un MVP de tier 1 no pesa como un MVP de tier 4. Sets de premios: [CAREER_SYSTEM.md](CAREER_SYSTEM.md) §6.2.
+Pesos a calibrar. Dirección: no debe ser óptimo eternizarse en tier 1 inflando 28 PPG. Un MVP de tier 1 no pesa como un MVP de tier 4. Sets de premios: [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §6.2.
+
+Slice actual (`legacyWeight` en el engine): formación 0.35, `national_league` 0.75, `american_league` 1.15. No hay split de nacional menor (0.5). El título `Continental` y `CMVP`/`CFMVP` ya tienen puntos propios y no se vuelven a ponderar. Fórmula: [SIMULATION.md](../rules/SIMULATION.md) §8.5.
 
 ## 4. Equipos
 
@@ -62,7 +64,9 @@ type Team = {
 
 MVP: **lista fija pequeña** (20–40 clubs ficticios) + generación por seed de "resto del cuadro" sin nombres inolvidables.
 
-Compañeros: 2–4 **shadow players** (nombre, posición, OVR) para eventos y para `estimatedStarterOverall`. No tienen carrera propia.
+Compañeros: 2–4 **shadow players** (`world.locker`: nombre, posición, OVR) para eventos y para `estimatedStarterOverall` (max OVR del locker; vacío = rating del club). No tienen carrera propia. Sin menú de plantilla. El míster es `world.coachName`. Se regeneran al cambiar de club; el stay los conserva. Copy: `teammate_star_clash` / `vet_minutes` / `locker_ice` / `coach_clash` nombran.
+
+Rival de carrera (PROVISIONAL, [D-22](../decisiones/DECISIONS.md)): **un** sombra generado con la seed, misma posición, otro club. Cada año cierra una línea (PTS, TAP, a veces placa). No se simula su vida entera. Eventos contra él (`rivalry`) son giros raros, no un segundo modo.
 
 Coach: `{ name, style, personality }` abstracto.
 
@@ -70,10 +74,10 @@ Coach: `{ name, style, personality }` abstracto.
 
 | Circuito | Regular | Playoffs | Notas |
 | --- | --- | --- | --- |
-| college | ~30 | torneo corto | alimenta draft |
-| national | ~30–40 | sí | |
-| continental | ~20 + knockout | sí | paralelo a national: el engine puede simular continental como chunks extra, no como segunda carrera |
-| american | ~60–82 agregado | sí, por rondas | internamente agregable; UI no muestra 82 scores |
+| college / club_academy | ~30 | torneo corto | alimenta draft. Slice: 30 PJ, corte a 15. |
+| national | ~30–40 | sí | slice: 40 PJ |
+| continental | ~20 + knockout | sí | paralelo a national: el engine simula un knockout extra, no una segunda carrera. Entra el club de `national_league` con cartel (`prestige ≥ 62`). Fórmulas: [SIMULATION.md](../rules/SIMULATION.md) §7 |
+| american | ~60–82 agregado | sí, por rondas | slice: 40 PJ agregados; UI no muestra 82 scores |
 
 Selección: 5–8 "partidos" de torneo en un único chunk especial.
 
@@ -83,11 +87,13 @@ Congestión (national + continental + selección) sube fatiga y lesiones. Es un 
 
 Eliminación por ronda. El usuario ve:
 
-- rival (nombre + rating percibido);
-- resultado de serie (o un único partido en tiers bajos);
-- stats de la serie.
+- el club rival de la ronda que cierra (nombre + escudo);
+- el marcador de esa serie (`formatPlayoffLine`);
+- el chip Campeón / Finales / Playoffs.
 
-Finals: más ceremonia, posible evento clutch, badge `clutch`.
+Slice actual: un rival generado, no todas las rondas. Sin boxscore de serie ni rating numérico. Formación es al mejor de 1; el resto, al mejor de 7. El recap pinta también el récord del club (`22-18`). Continental: al mejor de 5 + `formatContinentalLine`. Fórmulas: [SIMULATION.md](../rules/SIMULATION.md) §7.
+
+Finals: más ceremonia (beat de recap), posible badge `clutch`.
 
 ## 7. Draft de la liga americana
 
@@ -95,7 +101,7 @@ Solo existe un draft "grande" en el mundo MVP (el de `american_league`).
 
 Otras ligas: fichaje / invitación / ofertas, no ceremonia de 2 rondas.
 
-Relación con formación: college_circuit y clubes europeos alimentan stock. Ver [CAREER_SYSTEM.md](CAREER_SYSTEM.md).
+Relación con formación: college_circuit y clubes europeos alimentan stock. Ver [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md).
 
 ## 8. Selección nacional
 
@@ -103,12 +109,13 @@ No hay clasificatorias largas en el MVP.
 
 Cada 2 años, si `reputation`, OVR, y nacionalidad tienen pool:
 
-- convocado / no convocado / capitán (raro);
+- convocado / no convocado / capitán (raro) / declinado (giro `national_duty`, una vez, Juegos o Mundial; el continental no pregunta);
 - torneo: continental, world o olympics según el año del calendario ficticio;
 - resultado: fase de grupos abstracta + knockout;
+- knockout: un país rival (`foe`); grupos no. Copy `formatNationalStintLine` (`Oro ante Francia`). No es un segundo boxscore;
 - oro/plata/bronce como momentos de legacy.
 
-El calendario internacional se ancla al `year` de la run, no al año civil real, para que Daily de 2026 no dependa de si hay Juegos ese verano real — **PROVISIONAL** [D-10](DECISIONS.md).
+El calendario internacional se ancla al `year` de la run, no al año civil real, para que Daily de 2026 no dependa de si hay Juegos ese verano real — **PROVISIONAL** [D-10](../decisiones/DECISIONS.md).
 
 ## 9. Preparado para el futuro, no implementado
 

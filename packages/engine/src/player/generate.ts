@@ -5,8 +5,10 @@ import type {
   AttributeKey,
   Attributes,
   GrowthCurve,
+  Handed,
   Player,
   Position,
+  Rival,
   Team,
 } from "../state/types";
 import { ATTRIBUTE_KEYS, clampAttr } from "./attributes";
@@ -75,22 +77,37 @@ function buildAttributes(
   return attrs;
 }
 
-export function generatePlayer(rng: Rng): Player {
-  const nationality = rng.pick(NATIONALITIES);
+export function generatePlayer(
+  rng: Rng,
+  opts?: { position?: Position; nationality?: string; handed?: Handed; givenName?: string },
+): Player {
+  const rolledNationality = rng.pick(NATIONALITIES);
+  const nationality =
+    opts?.nationality && NAME_POOLS[opts.nationality] ? opts.nationality : rolledNationality;
   const names = NAME_POOLS[nationality]!;
-  const position = rng.pick(POSITIONS);
+  const rolledPosition = rng.pick(POSITIONS);
+  const position = opts?.position ?? rolledPosition;
   const archetype = rng.pick(archetypesFor(position));
   const [hMin, hMax] = HEIGHT[position];
   const potential = rng.int(68, 94);
   const attributes = buildAttributes(rng, position, archetype, potential);
+  const handed: Handed = opts?.handed ?? (rng.fork("hand").chance(0.12) ? "left" : "right");
+  if (handed === "left") {
+    attributes.finishing = clampAttr(attributes.finishing + 2);
+    attributes.ballHandling = clampAttr(attributes.ballHandling + 2);
+    attributes.freeThrow = clampAttr(attributes.freeThrow - 1);
+  }
   const overall = calculateOverall(attributes, position, archetype);
   const growthCurve = rng.pick(GROWTH);
+  const id = `pl_${rng.int(1000, 999999)}`;
+  const named = applyGivenName(rng.pick(names.first), rng.pick(names.last), opts?.givenName);
 
   return {
-    id: `pl_${rng.int(1000, 999999)}`,
-    firstName: rng.pick(names.first),
-    lastName: rng.pick(names.last),
+    id,
+    firstName: named.firstName,
+    lastName: named.lastName,
     nationality,
+    handed,
     age: STARTING_AGE,
     heightCm: rng.int(hMin, hMax),
     position,
@@ -117,22 +134,97 @@ export function generatePlayer(rng: Rng): Player {
       volatility: rng.int(25, 80),
     },
     role: roleFromOverall(overall, STARTING_AGE),
+    roleBias: 0,
     injuryHistory: [],
+    spent: 0,
+    flags: {
+      drafted: false,
+      draftClosed: false,
+      tradeRequest: false,
+      firedOnce: [],
+    },
+    badges: [],
   };
 }
 
-const TEAM_PREFIX = ["Harbor", "Iron", "Summit", "River", "Crown", "North", "Atlas", "Pioneer"];
-const TEAM_SUFFIX = ["United", "Club", "City", "Fleet", "Forge", "Wolves", "Kings", "Pulse"];
+const TEAM_PREFIX = ["Harbor", "Iron", "Summit", "River", "Crown", "North", "Atlas", "Pioneer", "Sunset", "Metro"];
+const TEAM_SUFFIX = ["Wolves", "Wings", "Storm", "Giants", "Pulse", "Forge", "Fleet", "Fire"];
 
-export function generateTeam(rng: Rng, country: string): Team {
+export function generateTeam(
+  rng: Rng,
+  country: string,
+  competitionId = "national_league",
+): Team {
   const name = `${rng.pick(TEAM_PREFIX)} ${rng.pick(TEAM_SUFFIX)}`;
+  const american = competitionId === "american_league";
+  const formation = competitionId === "club_academy" || competitionId === "college_circuit";
   return {
     id: `tm_${rng.int(1000, 999999)}`,
     name,
     country,
-    competitionId: "national_league",
-    rating: rng.int(62, 86),
-    prestige: rng.int(50, 85),
-    contention: rng.int(40, 80),
+    competitionId,
+    rating: rng.int(american ? 72 : formation ? 52 : 62, american ? 92 : formation ? 72 : 86),
+    prestige: rng.int(formation ? 35 : 50, formation ? 70 : 90),
+    contention: rng.int(35, 88),
   };
+}
+
+export function generateRival(rng: Rng, player: Player, home: Team): Rival {
+  const nationality = rng.pick(NATIONALITIES)!;
+  const names = NAME_POOLS[nationality]!;
+  let team = generateTeam(rng.fork("club"), nationality, home.competitionId);
+  if (team.name === home.name) {
+    team = generateTeam(rng.fork("club-b"), nationality, home.competitionId);
+  }
+  const ovr = calculateOverall(player.attributes, player.position, player.archetype);
+  return {
+    firstName: rng.pick(names.first)!,
+    lastName: rng.pick(names.last)!,
+    nationality,
+    position: player.position,
+    team,
+    overall: Math.max(62, Math.min(94, ovr + rng.int(-3, 5))),
+    lastPts: 0,
+    lastBlk: 0,
+    lastAwards: [],
+  };
+}
+
+export function advanceRival(rival: Rival, rng: Rng, playerTeamId: string): Rival {
+  let team = rival.team;
+  if (rng.chance(0.14) || team.id === playerTeamId) {
+    team = generateTeam(rng.fork("move"), rival.nationality, team.competitionId);
+  }
+  const overall = Math.max(58, Math.min(96, rival.overall + rng.int(-2, 3)));
+  const lastPts = Math.round((overall * 0.24 + rng.int(-4, 5)) * 10) / 10;
+  const lastBlk =
+    rival.position === "C" || rival.position === "PF"
+      ? Math.round((overall * 0.018 + rng.next()) * 10) / 10
+      : Math.round(rng.next() * 8) / 10;
+  let lastAwards: string[] = [];
+  if (overall >= 90 && rng.chance(0.08)) lastAwards = ["MVP"];
+  else if (overall >= 86 && rng.chance(0.18)) lastAwards = ["All-Team"];
+  return { ...rival, team, overall, lastPts, lastBlk, lastAwards };
+}
+
+function applyGivenName(
+  rolledFirst: string,
+  rolledLast: string,
+  raw?: string,
+): { firstName: string; lastName: string } {
+  const cleaned = sanitizePersonName(raw);
+  if (!cleaned) return { firstName: rolledFirst, lastName: rolledLast };
+  const parts = cleaned.split(" ").filter(Boolean);
+  if (parts.length === 1) return { firstName: parts[0]!, lastName: "" };
+  return { firstName: parts[0]!, lastName: parts.slice(1).join(" ") };
+}
+
+function sanitizePersonName(raw?: string): string {
+  if (!raw) return "";
+  return raw
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{M}'’\- ]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 40);
 }

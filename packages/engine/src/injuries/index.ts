@@ -7,15 +7,16 @@ export function rollInjury(
   year: number,
   rng: Rng,
 ): InjuryRecord | undefined {
-  const ageRisk = player.age >= 32 ? 0.06 : player.age >= 28 ? 0.03 : 0.015;
-  const durabilityRisk = (100 - player.durability) / 400;
-  const fatigueRisk = player.fatigue / 800;
-  const historyRisk = player.injuryHistory.filter((i) => i.severity === "moderate").length * 0.02;
-  const p = Math.min(0.28, 0.08 + ageRisk + durabilityRisk + fatigueRisk + historyRisk);
+  const ageRisk = player.age >= 32 ? 0.028 : player.age >= 28 ? 0.014 : 0.005;
+  const durabilityRisk = (100 - player.durability) / 1200;
+  const fatigueRisk = player.fatigue / 2800;
+  const historyRisk = player.injuryHistory.filter((i) => i.severity === "moderate").length * 0.01;
+  const minutesRisk = player.role === "star" || player.role === "franchise" ? 0.006 : 0;
+  const p = Math.min(0.1, 0.01 + ageRisk + durabilityRisk + fatigueRisk + historyRisk + minutesRisk);
 
   if (!rng.chance(p)) return undefined;
 
-  const moderate = rng.chance(0.28 + (player.age >= 33 ? 0.1 : 0));
+  const moderate = rng.chance(0.09 + (player.age >= 33 ? 0.04 : 0));
   const gamesMissed = moderate ? rng.int(10, 22) : rng.int(2, 7);
   return {
     seasonYear: year,

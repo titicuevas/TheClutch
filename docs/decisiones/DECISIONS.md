@@ -1,6 +1,8 @@
 # Decisions
 
-Inventario de contradicciones, lagunas y decisiones. Nada de esto debe implementarse como si estuviera cerrado.
+Inventario de contradicciones, lagunas y decisiones. **No es dueño de reglas**: el detalle vive en `rules/` y `models/`. Aquí solo el estado OPEN / PROVISIONAL / LOCKED y un enlace.
+
+Nada de esto debe implementarse como si estuviera cerrado.
 
 Leyenda: **OPEN** = hay que decidir. **PROVISIONAL** = el Lead recomienda X hasta que se confirme.
 
@@ -28,7 +30,7 @@ El loop empieza en "Crear jugador", pero Daily y Challenge **asignan** el jugado
 
 `simulateGame()` + 18 temporadas × 60 partidos es incompatible con el pacing si cada partido es una pantalla.
 
-→ **LOCKED** en [SIMULATION.md](SIMULATION.md): la UI vive en la **temporada**. El partido es interno. Un evento puede cortar a mitad; el resto del año se reanuda.
+→ **LOCKED** en [SIMULATION.md](../rules/SIMULATION.md): la UI vive en la **temporada**. El partido es interno. Un evento puede cortar a mitad; el resto del año se reanuda.
 
 ### A-4. Simulación rica (compañeros, coach, liga) vs motor rápido
 
@@ -52,13 +54,13 @@ Si `playerSeed` también fija toda la suerte, mismas decisiones = misma carrera 
 
 El brief lista ambos. Work ethic puede ser un trait derivado de `professionalism`.
 
-→ Incluidos como traits en [PLAYER_MODEL.md](PLAYER_MODEL.md). No duplicar en UI.
+→ Incluidos como traits en [PLAYER_MODEL.md](../models/PLAYER_MODEL.md). No duplicar en UI.
 
 ### A-8. Competiciones reales nombradas vs "sin licencias"
 
 El brief pide estar preparado para NBA/EuroLeague/NCAA/EuroBasket y a la vez equipos ficticios.
 
-→ Tiers genéricos en código. Copy sin marcas. [COMPETITIONS.md](COMPETITIONS.md).
+→ Tiers genéricos en código. Copy sin marcas. [COMPETITIONS.md](../models/COMPETITIONS.md).
 
 ### A-9. `simulatePeriod()` no está definido
 
@@ -98,9 +100,11 @@ Hasta cerrar: repo `TheClutch`, UI puede usar un placeholder. No renombrar packa
 
 ### D-02 Alcance del creador de jugador en Free
 
-**PROVISIONAL: solo generación + reroll**
+**PROVISIONAL: generación + identidad ligera (nombre opcional, posición, nacionalidad, mano) + reroll. Sin sliders.**
 
-Opciones: reroll / nombre+país manual / sliders.
+Free: el usuario puede fijar un nombre, `PG | SG | SF | PF | C`, país y mano dominante antes de generar. Arquetipo, atributos y potencial salen de la seed. Si no hay nombre, sale del pool de la nacionalidad. El reroll **conserva** esa identidad. Daily/Challenge **ignoran** esas elecciones: el jugador viene asignado.
+
+Un campo de nombre no es el creador profundo. Los 14 sliders siguen **fuera de MVP**. Ver [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §2.
 
 ### D-03 Granularidad visible de la temporada
 
@@ -108,19 +112,24 @@ Opciones: reroll / nombre+país manual / sliders.
 
 La UI no muestra chunks. El engine puede chequear 1–2 veces por dentro (lesión/evento). Playoffs sí se ven por rondas, breves.
 
-Cerrado en diseño: temporada = flujo; eventos = esporádicos con dientes. Ver [GAME_DESIGN.md](GAME_DESIGN.md) §5.1.
+Cerrado en diseño: temporada = flujo; eventos = esporádicos con dientes. Ver [GAME_DESIGN.md](../rules/GAME_DESIGN.md) §5.1.
 
 ### D-04 Punto de arranque de la carrera
 
-**OPEN** (recomendación: 17–19 años, primera decisión Europa-like vs college-like)
+**PROVISIONAL: 18 años. Primera decisión: club en casa vs universidad en América.**
 
-Afecta draft eligibility, altura del tutorial y duración.
+No NCAA como marca. Universidad: más stock y puede irse a los 19. Club: sueldo y un año más antes del draft. Detalle: [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §2 y [D-05](#d-05-reglas-de-draft-eligibility).
 
 ### D-05 Reglas de Draft eligibility
 
-**OPEN**
+**PROVISIONAL: ambos circuitos pueden declararse. Las ventanas no son iguales.**
 
-Edad mínima, años de college, one-and-done ficticio, si Europa puede declararse igual.
+| Ruta | Primera ventana | Última | Esperar cierra |
+| --- | --- | --- | --- |
+| Universidad | 1 temporada, edad 19 (one-and-done) | 20 | sí, a los 20 |
+| Club | 2 temporadas, edad 20 | 21 | sí, a los 21 |
+
+Europa no está vetada del draft americano. El coste es el año extra en casa. Sin marcas NCAA. Detalle: [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §5.1.
 
 ### D-06 runSeed compartido en Challenge
 
@@ -130,7 +139,7 @@ Opción B: "lock luck" para puzzles de skill pura. Se puede añadir después com
 
 ### D-07 Mercado Europa vs trades americanos
 
-**Cerrado en intención:** ver [CAREER_SYSTEM.md](CAREER_SYSTEM.md) §4.3.
+**Cerrado en intención:** ver [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §4.3.
 
 - América: trade involuntario posible, raro, siempre visible, con motivo.
 - Europa: el jugador consiente la salida.
@@ -186,9 +195,9 @@ Elegir ORM en Fase 3, no ahora. El engine no depende de ello.
 
 ### D-16 Moneda / salarios
 
-**PROVISIONAL: unidades abstractas mostradas como "$" genérico o "★"**
+**PROVISIONAL: unidades abstractas pintadas como millones de `$` genérico** (`22` → `$22M`)
 
-Evitar €/USD reales y CBA.
+Evitar €/USD reales, Forex y CBA. El número sirve para comparar ofertas (`$22M` vs `$14M`), no para simular nóminas. El circuito no cambia de símbolo. Copy: `formatWage` en el engine.
 
 ### D-17 Umbral de percentil mínimo
 
@@ -212,7 +221,29 @@ Una carrera dura 15 min; perderla al cerrar el móvil duele. Checkpoint por temp
 
 ### D-21 Traspaso involuntario: ¿existe?
 
-**LOCKED: sí, en `american_league`, con frenos.** Eres el jugador, no el GM; perder control a veces es el fantasy. Sin frenos (protección, rareza, pantalla propia) se rompe la agencia. Detalle: [CAREER_SYSTEM.md](CAREER_SYSTEM.md) §4.3.
+**LOCKED: sí, en `american_league`, con frenos.** Eres el jugador, no el GM; perder control a veces es el fantasy. Sin frenos (protección, rareza, pantalla propia) se rompe la agencia. Detalle: [CAREER_SYSTEM.md](../rules/CAREER_SYSTEM.md) §4.3.
+
+### D-22 Rival de carrera
+
+**PROVISIONAL: un sombra, no una segunda simulación.**
+
+Misma posición, otro club, línea anual. Eventos `rivalry` raros. Copero: se siente que hay alguien al otro lado, no un modo mánager.
+
+### D-23 Fama / amor del club
+
+**PROVISIONAL: chip derivado de morale + coach + vestuario.** No barra de progreso. Firmar fuera (mercado / descuento de casa) enfría el chip si el club te quería. `go_home` no: volver a casa se siente bien. Giro offseason `leaving_home` (una vez): 3+ años en un club (no formación) y uno en otro. Cerrar el capítulo (vestuario nuevo) vs no olvidar (lealtad, chip más frío). A mitad, si el chip está `loved` o `cold`, puede salir `home_crowd` (una vez): comerte la grada vs no inflarte, o ganar los pitos vs pedir el cambio.
+
+### D-24 Salud mental
+
+**PROVISIONAL: vive en `morale` (+ fatiga), no en una tercera barra.** Evento raro `lifestyle_pressure`: titular (o más) con la cabeza abajo. Bajar revoluciones recorta minutos del resto del año; seguir a tope deja el uso y el desgaste. Copy de carrera, no clínico.
+
+### D-25 Tienda / gastar salario
+
+**PROVISIONAL: no hay tienda. Gastar es un giro raro de lifestyle, no un menú.**
+
+Una tienda de entrenador, psicólogo, casas o coches por temporada es modo mánager: para cada verano, rompe Copero, duplica el gym (`training` / `work_summer`) y obliga a una segunda CTA.
+
+Si el dinero se nota: evento `lifestyle_flex` (una vez). Casa/coche vs quedarte liviano. Efecto `spent` + ego/moral/fatiga. Dura esa decisión, se agota. **Sin inventario. Sin wallet. Sin staff.** El max deal no es “para comprar el entrenador”. Mobile: la misma carta de decisión (44px, una CTA).
 
 ---
 
@@ -236,6 +267,8 @@ Estas son **LOCKED** salvo proceso de 4 pasos:
 | L-12 | Temporada = flujo; eventos = giros esporádicos |
 | L-13 | Trade involuntario posible en american_league, raro y visible |
 | L-14 | Premios en el recap; gala solo si gordo (MVP/DPOY/FMVP/ROY) |
+| L-15 | KISS/DRY: un concepto, un dueño; nada por si acaso |
+| L-16 | Docs en architecture / models / rules / roadmap / agents / decisiones |
 
 ---
 

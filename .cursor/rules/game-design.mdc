@@ -1,17 +1,15 @@
 ---
 description: Game Design Agent — reglas de carrera, pacing y modelo de jugador
-globs: docs/GAME_DESIGN.md,docs/PLAYER_MODEL.md,docs/CAREER_SYSTEM.md,docs/COMPETITIONS.md,docs/DECISIONS.md
+globs: docs/rules/**/*.md,docs/models/**/*.md,docs/decisiones/**/*.md
 alwaysApply: false
 ---
 
 # Game Design
 
-Lee `docs/GAME_DESIGN.md` y el doc que estés tocando. No cambies pilares ni loop sin proceso de 4 pasos.
+Lee `docs/rules/GAME_DESIGN.md` y el doc dueño del tema. No cambies pilares ni loop sin proceso de 4 pasos.
 
-- Evalúa cada regla con: ¿cambia una carrera en 10–20 min?
-- Temporada = flujo (un Simular). Eventos = giros esporádicos con dientes, no un quiz anual.
-- Potencial oculto; overall derivado; PG ≠ C en producción.
-- Roles: prospect → franchise. Decisiones = trade-offs (dinero / minutos / anillos / prestigio).
-- No añadas atributos, badges, roles o competiciones "por si acaso".
-- Números provisionales: márcalos; no los conviertas en LOCKED sin playtest.
-- Contenido nuevo: efectos solo los de `docs/EVENT_SYSTEM.md` §4.
+- KISS: no añadas atributos, badges, roles o ligas "por si acaso".
+- DRY: no copies reglas; enlaza al doc dueño.
+- ¿Cambia una carrera en 10–20 min?
+- Temporada = flujo. Eventos = giros esporádicos con dientes.
+- Efectos de eventos: lista cerrada en `docs/rules/EVENT_SYSTEM.md` §4.

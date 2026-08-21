@@ -5,11 +5,19 @@ import {
   calculateLegacy,
   getViewModel,
 } from "./index";
+import { formatBalanceReport, runBalanceBatch } from "./balance/batch";
 
 function arg(flag: string, fallback: string): string {
   const idx = process.argv.indexOf(flag);
   if (idx >= 0 && process.argv[idx + 1]) return process.argv[idx + 1]!;
   return fallback;
+}
+
+if (process.argv.includes("--batch")) {
+  const n = Math.max(1, Number(arg("--n", "400")) || 400);
+  const prefix = arg("--prefix", "batch");
+  console.log(formatBalanceReport(runBalanceBatch(n, prefix)));
+  process.exit(0);
 }
 
 const playerSeed = arg("--seed", `free:${Date.now()}`);
@@ -29,25 +37,43 @@ console.log(`seeds  player=${playerSeed}  run=${runSeed}`);
 console.log("");
 
 while (!state.retired) {
-  const year = state.world.year;
+  if (state.awaitingRecap) {
+    state = dispatch(state, { type: "SIMULATE_NEXT" }).state;
+    continue;
+  }
+  if (state.pendingDecision) {
+    const choice = state.pendingDecision.options[0]!;
+    console.log(`  → ${state.pendingDecision.title}: ${choice.label}`);
+    const before = state.history.length;
+    state = dispatch(state, { type: "CHOOSE", optionId: choice.id }).state;
+    if (!state.pendingDecision && state.history.length > before) {
+      printSeason(state.history.at(-1)!);
+    }
+    continue;
+  }
+
   const result = dispatch(state, { type: "SIMULATE_NEXT" });
   state = result.state;
-  const vm = getViewModel(state);
-  const season = vm.lastSeason;
-  if (season && result.log[0]?.startsWith("Season")) {
-    const inj = season.injury ? `  [${season.injury.severity} ${season.injury.type}]` : "";
-    const extra = [...season.awards, ...season.titles].join(" ");
-    console.log(
-      `Y${year}  age ${season.age}  OVR ${season.overall}  ${season.role.padEnd(10)}  ` +
-        `${season.stats.pts.toFixed(1)}/${season.stats.ast.toFixed(1)}/${season.stats.reb.toFixed(1)}  ` +
-        `${season.stats.games}g${inj}${extra ? `  ${extra}` : ""}`,
-    );
-  }
-}
+  if (state.pendingDecision) continue;
 
-if (!state.retired) {
-  state = dispatch(state, { type: "RETIRE" }).state;
+  const season = getViewModel(state).lastSeason;
+  if (season && result.log.some((line) => line.startsWith("Season"))) {
+    printSeason(season);
+  }
 }
 
 console.log("");
 console.log(formatLegacyCard(calculateLegacy(state)));
+
+function printSeason(season: NonNullable<ReturnType<typeof getViewModel>["lastSeason"]>): void {
+  const inj = season.injury ? `  [${season.injury.severity} ${season.injury.type}]` : "";
+  const extra = [season.playoff, ...season.awards, ...season.titles].join(" ");
+  const nt = season.national
+    ? `  NT:${season.national.status}${season.national.result ? `/${season.national.result}` : ""}${season.national.foe ? ` vs ${season.national.foe}` : ""}`
+    : "";
+  console.log(
+    `Y${season.year}  age ${season.age}  OVR ${season.overall}  ${season.role.padEnd(10)}  ` +
+      `${season.stats.pts.toFixed(1)}/${season.stats.ast.toFixed(1)}/${season.stats.reb.toFixed(1)}  ` +
+      `${season.stats.games}g${inj}${extra ? `  ${extra}` : ""}${nt}`,
+  );
+}

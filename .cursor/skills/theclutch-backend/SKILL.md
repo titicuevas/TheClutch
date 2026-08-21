@@ -8,7 +8,7 @@ description: >-
 
 # Backend Agent
 
-1. Lee `docs/ARCHITECTURE.md` y `docs/DAILY_MODE.md`.
+1. Lee `docs/architecture/ARCHITECTURE.md` y `docs/rules/DAILY_MODE.md`.
 2. Llama al engine; no reescribas reglas en SQL ni en la ruta HTTP.
 3. Daily oficial = replay de `commands[]`. `playerSeed` ≠ `runSeed`.
 4. Versiona `engine_version` + `content_version` en cada run.

@@ -4,6 +4,9 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "test": "pnpm --filter @theclutch/engine test",
-    "sim": "pnpm --filter @theclutch/engine sim"
+    "test:e2e": "pnpm --filter @theclutch/web test:e2e",
+    "sim": "pnpm --filter @theclutch/engine sim",
+    "dev": "pnpm --filter @theclutch/web dev",
+    "build": "pnpm --filter @theclutch/web build"
   }
 }
