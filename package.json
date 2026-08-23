@@ -1,7 +1,9 @@
 {
   "name": "theclutch",
   "private": true,
-  "engines": { "node": ">=20.9.0" },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "test": "pnpm --filter @theclutch/engine test",
@@ -10,5 +12,8 @@
     "dev": "pnpm --filter @theclutch/web dev",
     "start": "pnpm --filter @theclutch/web start",
     "build": "pnpm --filter @theclutch/web build"
+  },
+  "devDependencies": {
+    "railway": "3.10.0"
   }
 }
