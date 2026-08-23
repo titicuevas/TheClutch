@@ -40,3 +40,19 @@ export function AwardMark({ className }: IconProps) {
     </svg>
   );
 }
+
+export function ClutchOutcomeMark({
+  tone,
+  testId = "clutch-outcome",
+}: {
+  tone: "good" | "bad" | "neutral";
+  testId?: string;
+}) {
+  const label = tone === "good" ? "Dentro" : tone === "bad" ? "Fuera" : "Sistema";
+  const color = tone === "good" ? "text-good" : tone === "bad" ? "text-clutch" : "text-gold";
+  return (
+    <span data-testid={testId} className={`block text-xs font-semibold uppercase tracking-widest ${color}`}>
+      Momento clutch · {label}
+    </span>
+  );
+}

@@ -10,7 +10,7 @@ import {
   TITLE_LABEL,
   injuryLine,
 } from "../lib/labels";
-import { AwardMark, ChampMark, TitleMark } from "./Marks";
+import { AwardMark, ChampMark, ClutchOutcomeMark, TitleMark } from "./Marks";
 import { TeamCrest } from "./TeamCrest";
 
 const HEADLINE = new Set(["MVP", "DPOY", "FMVP", "ROY", "MIP", "CMVP", "CFMVP"]);
@@ -126,15 +126,10 @@ export function SeasonRecap({
                         : "border-white/10"
                   }`}
                 >
-                  {choice.title === "La última bola" && choice.outcomeTone !== "neutral" ? (
-                    <span
-                      data-testid="clutch-outcome"
-                      className={`mb-1 block text-xs font-semibold uppercase tracking-widest ${
-                        choice.outcomeTone === "good" ? "text-good" : "text-clutch"
-                      }`}
-                    >
-                      Momento clutch · {choice.outcomeTone === "good" ? "Dentro" : "Fuera"}
-                    </span>
+                  {choice.title === "La última bola" && choice.outcomeTone ? (
+                    <div className="mb-1">
+                      <ClutchOutcomeMark tone={choice.outcomeTone} />
+                    </div>
                   ) : null}
                   <span className="text-gold">{KIND_LABEL[choice.kind] ?? choice.kind}</span>
                   <span className="text-mute"> · {choice.title} → </span>

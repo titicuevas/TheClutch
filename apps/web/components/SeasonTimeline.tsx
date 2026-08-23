@@ -12,7 +12,7 @@ import {
   TITLE_LABEL,
   injuryLine,
 } from "../lib/labels";
-import { ChampMark, TitleLine, TitleMark } from "./Marks";
+import { ChampMark, ClutchOutcomeMark, TitleLine, TitleMark } from "./Marks";
 import { TeamCrest } from "./TeamCrest";
 
 type Midseason = NonNullable<CareerViewModel["midseason"]>;
@@ -180,6 +180,7 @@ function SeasonRow({
 }
 
 function SeasonYear({ season, focused, expanded, onToggle }: { season: SeasonRecord; focused?: boolean; expanded: boolean; onToggle: () => void }) {
+  const clutchChoice = season.choices.find((choice) => choice.title === "La última bola" && choice.outcomeTone);
   return (
     <article className={`surface rounded-xl border px-3 py-2.5 ${focused ? "border-gold/55" : "border-line"}`}>
       <button type="button" onClick={onToggle} aria-expanded={expanded} className="flex min-h-11 w-full items-center justify-between gap-2 text-left">
@@ -280,6 +281,12 @@ function SeasonYear({ season, focused, expanded, onToggle }: { season: SeasonRec
           </span>
         ) : null}
       </div>
+      {clutchChoice?.outcomeTone ? (
+        <div className="mt-3 rounded-lg border border-white/10 bg-ink/70 px-3 py-2">
+          <ClutchOutcomeMark tone={clutchChoice.outcomeTone} testId="clutch-outcome-history" />
+          {clutchChoice.outcome ? <p className="mt-1 text-xs leading-relaxed text-mute">{clutchChoice.outcome}</p> : null}
+        </div>
+      ) : null}
       </div> : null}
     </article>
   );
