@@ -35,11 +35,14 @@ function nextUtcMidnight(now: Date): number {
 
 export function DailyPanel({ daily }: { daily: DailyPreview }) {
   const router = useRouter();
+  const [hydrated, setHydrated] = useState(false);
   const [resetLabel, setResetLabel] = useState("");
   const [officialUsed, setOfficialUsed] = useState(false);
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState("");
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
     function tick() {
@@ -138,6 +141,7 @@ export function DailyPanel({ daily }: { daily: DailyPreview }) {
         </>
 
       <form onSubmit={playCode} className="mt-2 flex flex-col gap-2 border-t border-line pt-3">
+        <fieldset disabled={!hydrated} aria-busy={!hydrated} className="flex min-w-0 flex-col gap-2 disabled:opacity-80">
         <label htmlFor="challenge-code" className="text-xs uppercase tracking-widest text-mute">
           Challenge
         </label>
@@ -154,6 +158,7 @@ export function DailyPanel({ daily }: { daily: DailyPreview }) {
         <button type="submit" className="btn-option h-11 rounded-xl text-sm text-cream">
           Jugar código
         </button>
+        </fieldset>
       </form>
     </section>
   );

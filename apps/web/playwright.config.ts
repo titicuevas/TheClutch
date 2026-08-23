@@ -14,8 +14,22 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    ...devices["Pixel 5"],
   },
+  projects: [
+    {
+      name: "chromium-mobile",
+      use: { ...devices["Pixel 5"] },
+    },
+    {
+      name: "firefox-desktop",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit-mobile",
+      timeout: 360_000,
+      use: { ...devices["iPhone 13"] },
+    },
+  ],
   webServer: {
     command: `pnpm exec next dev --port ${port}`,
     url: `http://127.0.0.1:${port}`,

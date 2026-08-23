@@ -2,7 +2,7 @@
 
 import { NATIONALITIES, type Handed, type Position } from "@theclutch/engine";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { FLAG } from "../lib/crest";
 import { HAND_LABEL, NATION_LABEL, POSITION_LABEL } from "../lib/labels";
 import { playHref } from "../lib/playHref";
@@ -13,11 +13,14 @@ const HANDS: Handed[] = ["right", "left"];
 
 export function StartForm() {
   const router = useRouter();
+  const [hydrated, setHydrated] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [position, setPosition] = useState<Position | "">("");
   const [nationality, setNationality] = useState("");
   const [handed, setHanded] = useState<Handed | "">("");
+
+  useEffect(() => setHydrated(true), []);
 
   function play(event: FormEvent) {
     event.preventDefault();
@@ -35,7 +38,12 @@ export function StartForm() {
   }
 
   return (
-    <form id="free-career" onSubmit={play} className="surface below-fold scroll-mt-4 flex flex-col gap-2.5 rounded-3xl border border-line p-4">
+    <form id="free-career" onSubmit={play}>
+      <fieldset
+        disabled={!hydrated}
+        aria-busy={!hydrated}
+        className="surface below-fold scroll-mt-4 flex min-w-0 flex-col gap-2.5 rounded-3xl border border-line p-4 disabled:opacity-80"
+      >
       <div><p className="text-xs uppercase tracking-[0.3em] text-gold">Carrera libre</p><h2 className="font-display mt-1 text-2xl">Tu carta, tu historia</h2></div>
       <p className="text-sm leading-relaxed text-mute">Nada es obligatorio. Si no eliges, sale una carta.</p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -134,6 +142,7 @@ export function StartForm() {
       >
         Empezar carrera
       </button>
+      </fieldset>
     </form>
   );
 }

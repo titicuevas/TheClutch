@@ -201,6 +201,7 @@ Bloques:
 ## 6. Frontend
 
 - Next.js 16 sobre Node.js 22+; build de producción con Webpack mientras Turbopack no sea validable en todos los entornos del proyecto. La infraestructura Railway se declara en `.railway/railway.ts` con el SDK oficial versionado.
+- Soporte web: Chrome/Edge 111+, Firefox 111+ y Safari/iOS 16.4+. Playwright cubre Chromium móvil, Firefox escritorio y WebKit móvil; `browserslist` conserva los mismos mínimos para CSS/transpilación. Navegadores legacy, incluido Internet Explorer, quedan fuera.
 - App Router. Rutas mínimas de MVP: landing (Daily + Free), play (`mode=free|daily|challenge`), season-report, legacy.
 - Componentes tontos respecto al juego: reciben view models.
 - Un hook/store `useCareer()` habla con el engine en cliente y sincroniza al servidor en puntos de control (fin de temporada / fin de carrera). No cada comando, al menos al inicio.

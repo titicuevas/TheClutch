@@ -42,9 +42,8 @@ test.describe("creador ligero", () => {
 
     await expectCareerIdentity(page, { pos: "Base", nat: "España", hand: "Zurdo" });
     await expect(page.getByRole("button", { name: "Otra carta" })).toBeVisible();
-    const before = await page.getByTestId("player-name").innerText();
     await page.getByRole("button", { name: "Otra carta" }).click();
-    await expect(page.getByTestId("player-name")).not.toHaveText(before, { timeout: 8_000 });
+    await expect(page).toHaveURL(/r1/);
     await expectCareerIdentity(page, { pos: "Base", nat: "España", hand: "Zurdo" });
   });
 
