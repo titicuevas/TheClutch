@@ -3,8 +3,10 @@ import { StartForm } from "../components/StartForm";
 import { TeamCrest } from "../components/TeamCrest";
 import Link from "next/link";
 import { LandingTelemetry } from "../components/LandingTelemetry";
+import { createCareer, dailyIsoDate, dailyPlayerSeed, encodeChallengeCode, getViewModel } from "@theclutch/engine";
 
 export const metadata = { title: "Juega gratis", description: "Empieza una carrera de baloncesto en segundos, toma decisiones y construye tu legado." };
+export const revalidate = 60;
 
 const PREVIEW = [
   { id: "tm_harbor", name: "Harbor Wolves" },
@@ -14,6 +16,19 @@ const PREVIEW = [
 ];
 
 export default function HomePage() {
+  const iso = dailyIsoDate(new Date());
+  const playerSeed = dailyPlayerSeed(iso);
+  const vm = getViewModel(createCareer({ playerSeed, runSeed: "preview", mode: "daily", dailyDate: iso }));
+  const daily = {
+    iso,
+    name: vm.name,
+    nationality: vm.nationality,
+    position: vm.position,
+    heightCm: vm.heightCm,
+    archetype: vm.archetype,
+    potentialBand: vm.potentialBand,
+    code: encodeChallengeCode(playerSeed) ?? "",
+  };
   return (
     <main className="flex min-h-[90dvh] flex-col justify-between gap-6">
       <LandingTelemetry />
@@ -46,7 +61,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <DailyPanel />
+      <DailyPanel daily={daily} />
 
       <Link href="#free-career" className="flex min-h-11 items-center justify-center text-sm font-semibold text-gold">Prefiero una carrera libre</Link>
 
