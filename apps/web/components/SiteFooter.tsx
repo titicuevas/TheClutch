@@ -12,7 +12,7 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-10 border-t border-line py-6 text-xs text-mute">
+    <footer className="below-fold mt-10 border-t border-line py-6 text-xs text-mute">
       <nav aria-label="Enlaces del sitio" className="flex flex-wrap justify-center gap-x-4 gap-y-2">
         {links.map(([label, href]) => <Link key={href} href={href} className="min-h-11 content-center hover:text-gold">{label}</Link>)}
       </nav>

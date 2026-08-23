@@ -35,7 +35,7 @@ export function StartForm() {
   }
 
   return (
-    <form id="free-career" onSubmit={play} className="surface scroll-mt-4 flex flex-col gap-2.5 rounded-3xl border border-line p-4">
+    <form id="free-career" onSubmit={play} className="surface below-fold scroll-mt-4 flex flex-col gap-2.5 rounded-3xl border border-line p-4">
       <div><p className="text-xs uppercase tracking-[0.3em] text-gold">Carrera libre</p><h2 className="font-display mt-1 text-2xl">Tu carta, tu historia</h2></div>
       <p className="text-sm leading-relaxed text-mute">Nada es obligatorio. Si no eliges, sale una carta.</p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">

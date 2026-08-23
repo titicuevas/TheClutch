@@ -112,6 +112,11 @@ body {
 .prose-copy h2 { margin-top: 1.5rem; color: #f4ead6; font-weight: 700; }
 .prose-copy p { margin-top: 0.75rem; color: #b5aea2; line-height: 1.7; }
 
+.below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
+
 @media (max-width: 639px) {
   [data-testid="season-cta"] { position: sticky; bottom: max(0.75rem, env(safe-area-inset-bottom)); }
 }

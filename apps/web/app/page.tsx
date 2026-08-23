@@ -65,7 +65,7 @@ export default function HomePage() {
 
       <Link href="#free-career" className="flex min-h-11 items-center justify-center text-sm font-semibold text-gold">Prefiero una carrera libre</Link>
 
-      <section id="como-jugar" className="surface rounded-3xl border border-line p-5">
+      <section id="como-jugar" className="surface below-fold rounded-3xl border border-line p-5">
         <p className="text-xs uppercase tracking-[0.3em] text-gold">Cómo se juega</p>
         <h2 className="font-display mt-2 text-3xl">Una carrera en tres gestos</h2>
         <ol className="mt-4 grid gap-3 text-sm text-mute sm:grid-cols-3">
