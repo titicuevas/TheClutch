@@ -1,7 +1,7 @@
 "use client";
 
 import { formatNationalChip, formatPlayoffLine, formatTeamRecord, formatTitleLine, type CareerViewModel, type SeasonRecord } from "@theclutch/engine";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AWARD_LABEL,
   BADGE_LABEL,
@@ -36,7 +36,14 @@ type Props = {
 
 export function SeasonTimeline({ history, stints, midseason, year, focusYear }: Props) {
   const blocks = groupByClub(history, midseason, year);
-  const [expandedYear, setExpandedYear] = useState(focusYear ?? history.at(-1)?.year);
+  const latestYear = focusYear ?? history.at(-1)?.year;
+  const [selectedYear, setSelectedYear] = useState(latestYear);
+  const [expandedYear, setExpandedYear] = useState(latestYear);
+
+  useEffect(() => {
+    setSelectedYear(latestYear);
+    setExpandedYear(latestYear);
+  }, [latestYear]);
 
   if (!blocks.length) return null;
 
@@ -46,9 +53,10 @@ export function SeasonTimeline({ history, stints, midseason, year, focusYear }: 
         <label htmlFor="season-jump" className="text-xs font-semibold uppercase tracking-wider text-mute">Ir al año</label>
         <select
           id="season-jump"
-          defaultValue={focusYear ?? history.at(-1)?.year}
+          value={selectedYear}
           onChange={(event) => {
             const selected = Number(event.target.value);
+            setSelectedYear(selected);
             setExpandedYear(selected);
             requestAnimationFrame(() => document.getElementById(`season-${selected}`)?.scrollIntoView({ block: "center" }));
           }}

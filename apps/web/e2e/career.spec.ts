@@ -89,5 +89,15 @@ test.describe("carrera happy path", () => {
     await page.reload();
     await expect(page.getByTestId("career-timeline")).toBeVisible();
     await expect(page.getByTestId("season-row-1")).toBeVisible();
+
+    await playUntil(page, "season-recap", 30);
+    await page.getByRole("button", { name: "Ver el año" }).click();
+    const seasonJump = page.getByLabel("Ir al año");
+    await expect(seasonJump).toHaveValue("2");
+    await expect(page.getByTestId("season-details-2")).toBeVisible();
+
+    await seasonJump.selectOption("1");
+    await expect(seasonJump).toHaveValue("1");
+    await expect(page.getByTestId("season-details-1")).toBeVisible();
   });
 });
