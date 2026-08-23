@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteFooter } from "../components/SiteFooter";
 import { siteUrl } from "../lib/siteUrl";
 import { PwaRegister } from "../components/PwaRegister";
+import { ClientErrorMonitor } from "../components/ClientErrorMonitor";
 
 const display = Archivo_Black({
   weight: "400",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <SiteFooter />
           <PwaRegister />
+          <ClientErrorMonitor />
         </div>
       </body>
     </html>

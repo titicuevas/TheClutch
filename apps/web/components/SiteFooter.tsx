@@ -5,6 +5,7 @@ const links = [
   ["Casos", "/casos"],
   ["FAQs", "/faq"],
   ["Feedback", "/feedback"],
+  ["Estado", "/estado"],
   ["Agradecimientos", "/agradecimientos"],
   ["Privacidad", "/privacidad"],
 ] as const;

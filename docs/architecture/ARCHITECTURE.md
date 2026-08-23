@@ -204,7 +204,10 @@ Bloques:
 - Componentes tontos respecto al juego: reciben view models.
 - Un hook/store `useCareer()` habla con el engine en cliente y sincroniza al servidor en puntos de control (fin de temporada / fin de carrera). No cada comando, al menos al inicio.
 - Accesibilidad: targets 44px, contraste, foco visible, no depender del color para rol/forma. Móvil y tablet: una columna; las decisiones son la misma carta, no un menú extra.
-- La pre-alpha puede emitir telemetría first-party de embudo (`landing_view`, inicio por modo, carrera terminada, replay y feedback). **Sin cookies, cuenta, nombre de jugador, seeds, decisiones ni identificador persistente.** El endpoint solo valida una lista cerrada y escribe eventos agregables en logs; almacenamiento analítico duradero requiere documentarse antes.
+- La pre-alpha emite telemetría first-party de embudo (`landing_view`, inicio por modo, carrera terminada, replay y feedback). **Sin cookies, cuenta, IP persistida, user-agent, nombre de jugador, seeds, decisiones ni identificador persistente.** El endpoint valida una lista cerrada y persiste solo `{event, viewport, createdAt}` en PostgreSQL. Si la base no está disponible, degrada a log estructurado sin romper el juego.
+- El feedback explícito guarda `rating`, banda de dispositivo, punto del flujo, comentario y fecha. No guarda identidad técnica. Validación cerrada, honeypot, límites de longitud y cuerpo; sin panel público de comentarios.
+- `/estado` muestra únicamente métricas agregadas de 7 días (inicios, finales, repetición y feedback), nunca texto de feedback ni filas individuales.
+- Los errores de cliente se reducen a una categoría cerrada, ruta pública normalizada y fecha. No se envían mensajes libres, stack, estado de carrera ni query string.
 - PWA ligera: manifest, iconos propios y service worker network-first. Nunca cachear ni enviar `localStorage`; una actualización no debe borrar carreras.
 
 ## 7. Backend
@@ -216,6 +219,7 @@ Responsabilidades:
 - Materializar Daily a medianoche UTC (o on-demand con lock).
 - Replay + insert oficial de ranking.
 - Rate limit de submits.
+- Persistencia mínima de telemetría y feedback de pre-alpha; no toca ni reimplementa el engine.
 
 No:
 

@@ -15,11 +15,13 @@ export default function PrivacyPage() {
         <h2>Datos que tratamos</h2>
         <p>Esta alpha no requiere cuenta. La carrera, el intento Daily y las preferencias de juego se guardan localmente en tu navegador. Los nombres que escribas permanecen en ese almacenamiento salvo que compartas tú mismo una ficha.</p>
         <h2>Finalidad y conservación</h2>
-        <p>El guardado local permite continuar una carrera tras cerrar o recargar la página. Puedes eliminarlo borrando los datos del sitio desde tu navegador o usando las opciones de reinicio del juego.</p>
+        <p>El guardado local permite continuar una carrera tras cerrar o recargar la página. Puedes eliminarlo borrando los datos del sitio desde tu navegador o usando las opciones de reinicio del juego. Durante la pre-alpha conservamos en nuestra base de datos la telemetría mínima, los errores agregados y el feedback enviado para evaluar y corregir la prueba.</p>
         <h2>Telemetría mínima</h2>
-        <p>Registramos eventos first-party del embudo —por ejemplo, abrir la landing, empezar o terminar una carrera y preparar feedback— junto a una banda de dispositivo (móvil, tablet u ordenador). No incluimos cookies, cuenta, nombre del jugador, seeds, decisiones ni un identificador persistente. Si activas “No rastrear” en el navegador, el cliente no emite estos eventos.</p>
+        <p>Registramos eventos first-party del embudo —por ejemplo, abrir la landing, empezar o terminar una carrera y preparar feedback— junto a una banda de dispositivo (móvil, tablet u ordenador). También registramos únicamente la categoría y la zona de la aplicación cuando ocurre un error técnico. No incluimos el mensaje del error, trazas, cookies, cuenta, nombre del jugador, seeds, decisiones ni un identificador persistente. Si activas “No rastrear” en el navegador, el cliente no emite eventos del embudo.</p>
+        <h2>Feedback voluntario</h2>
+        <p>Si envías el formulario de feedback, guardamos la valoración, tipo de dispositivo, momento elegido y comentario que escribas. El envío es voluntario; no adjuntamos automáticamente el navegador, tu carrera ni un identificador. No introduzcas datos personales o sensibles en el comentario.</p>
         <h2>Cookies y terceros</h2>
-        <p>No usamos cookies publicitarias, perfiles comerciales ni venta de datos. Si incorporamos cuentas, analítica externa o almacenamiento duradero, actualizaremos esta política antes de activarlos.</p>
+        <p>No usamos cookies publicitarias, perfiles comerciales ni venta de datos. El alojamiento y la base de datos funcionan en Railway como proveedor técnico. Si incorporamos cuentas o analítica externa, actualizaremos esta política antes de activarlos.</p>
         <h2>Tus decisiones</h2>
         <p>No introduzcas datos sensibles en el nombre del jugador. Puedes dejar todos los campos de identidad vacíos y jugar con una carta generada.</p>
         <h2>Contacto</h2>

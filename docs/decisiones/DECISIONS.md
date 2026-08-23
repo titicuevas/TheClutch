@@ -183,9 +183,9 @@ Recomendación: UI ES primero si el playtest es local; keys en inglés en códig
 
 ### D-14 Hosting y ORM
 
-**PROVISIONAL: Next.js en Railway + Postgres + ORM ligero (Drizzle o Prisma)**
+**PROVISIONAL: Next.js + Postgres en Railway. Cliente SQL ligero para pre-alpha; ORM al entrar CRUD relacional de runs/auth.**
 
-Elegir ORM en Fase 3, no ahora. El engine no depende de ello.
+Telemetría y feedback usan SQL mínimo encapsulado fuera del engine; introducir Drizzle/Prisma solo para dos inserts y agregados añade más superficie que valor. Al entrar `career_runs`, auth y ranking se reevalúa un ORM. El engine no depende de ello.
 
 ### D-15 Métrica del ranking semanal
 

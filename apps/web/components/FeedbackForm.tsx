@@ -5,30 +5,53 @@ import { track } from "../lib/telemetry";
 
 export function FeedbackForm() {
   const [status, setStatus] = useState("");
+  const [sending, setSending] = useState(false);
   useEffect(() => track("feedback_open"), []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
+    setSending(true);
+    setStatus("Enviando…");
     track("feedback_prepare");
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
+    const report = {
+      rating: Number(form.get("rating")),
+      device: String(form.get("device")),
+      moment: String(form.get("moment")),
+      comment: String(form.get("comment")),
+      website: String(form.get("website") ?? ""),
+    };
     const text = [
       "FEEDBACK THECLUTCH",
-      `Valoración: ${form.get("rating")}/5`,
-      `Dispositivo: ${form.get("device")}`,
-      `Momento: ${form.get("moment")}`,
-      `Comentario: ${form.get("comment")}`,
-      `Navegador: ${navigator.userAgent}`,
+      `Valoración: ${report.rating}/5`,
+      `Dispositivo: ${report.device}`,
+      `Momento: ${report.moment}`,
+      `Comentario: ${report.comment}`,
     ].join("\n");
     try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(report),
+      });
+      if (response.ok) {
+        formElement.reset();
+        setStatus("Feedback recibido. Gracias por ayudarnos a mejorar TheClutch.");
+        return;
+      }
       if (navigator.share) {
         await navigator.share({ title: "Feedback TheClutch", text });
-        setStatus("Informe compartido. Gracias por probar la carrera.");
+        setStatus("El envío directo no estaba disponible; informe compartido. Gracias por probar la carrera.");
       } else {
         await navigator.clipboard.writeText(text);
-        setStatus("Informe copiado. Envíalo por el canal por el que recibiste la prueba.");
+        setStatus("El envío directo no estaba disponible; informe copiado. Envíalo por el canal de la prueba.");
       }
     } catch (error) {
-      if ((error as DOMException).name !== "AbortError") setStatus("No se pudo compartir. Selecciona y copia el comentario manualmente.");
+      if ((error as DOMException).name === "AbortError") setStatus("Envío cancelado. Tu comentario sigue en el formulario.");
+      else setStatus("No se pudo enviar ni compartir. Tu comentario sigue en el formulario para que puedas copiarlo.");
+    } finally {
+      setSending(false);
     }
   }
 
@@ -61,8 +84,12 @@ export function FeedbackForm() {
         ¿Qué mejorarías?
         <textarea name="comment" required minLength={5} maxLength={1000} rows={5} className="mt-2 w-full rounded-xl border border-line bg-ink p-3 text-cream" placeholder="Algo que no entendí, me gustó o me frenó…" />
       </label>
-      <p className="text-xs leading-relaxed text-mute">No se envía nada a TheClutch automáticamente. Tu dispositivo abrirá el menú para compartir o copiará el informe.</p>
-      <button className="btn-primary h-14 w-full text-lg" type="submit">Preparar feedback</button>
+      <label className="sr-only" aria-hidden="true">
+        Sitio web
+        <input name="website" tabIndex={-1} autoComplete="off" />
+      </label>
+      <p className="text-xs leading-relaxed text-mute">Al pulsar enviar guardaremos estos cuatro campos para mejorar la alpha. Si el servicio no está disponible, podrás compartir o copiar el informe.</p>
+      <button className="btn-primary h-14 w-full text-lg disabled:opacity-60" type="submit" disabled={sending}>{sending ? "Enviando…" : "Enviar feedback"}</button>
       <p role="status" aria-live="polite" className="min-h-5 text-sm text-good">{status}</p>
     </form>
   );
