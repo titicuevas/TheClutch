@@ -999,18 +999,8 @@ const resolvers: Record<string, Apply> = {
     ),
   }),
 
-  "playoff_push:hunt": (s) => ({
-    ...s,
-    player: markFired(
-      {
-        ...s.player,
-        roleBias: clamp(s.player.roleBias + 1, -2, 2),
-        fatigue: clamp(s.player.fatigue + 12, 0, 95),
-      },
-      "playoff_push",
-    ),
-  }),
-  "playoff_push:save": (s) => ({
+  "playoff_push:hunt": (s, rng) => resolveClutchShot(s, rng),
+  "playoff_push:save": (s) => withChoiceOutcome({
     ...s,
     player: markFired(
       {
@@ -1018,10 +1008,11 @@ const resolvers: Record<string, Apply> = {
         roleBias: clamp(s.player.roleBias - 1, -2, 2),
         fatigue: clamp(s.player.fatigue - 8, 0, 95),
         durability: clamp(s.player.durability + 2, 40, 99),
+        teammateRelation: clamp(s.player.teammateRelation + 4, 10, 95),
       },
       "playoff_push",
     ),
-  }),
+  }, "El sistema encontró el tiro. Llegaste con piernas al cierre.", "neutral"),
 
   "captain_c:wear": (s) => ({
     ...s,
@@ -1066,6 +1057,40 @@ const resolvers: Record<string, Apply> = {
     retired: true,
   }),
 };
+
+function withChoiceOutcome(state: CareerState, outcome: string, outcomeTone: "good" | "bad" | "neutral"): CareerState {
+  const yearLog = [...(state.world.yearLog ?? [])];
+  const index = yearLog.length - 1;
+  if (index >= 0) yearLog[index] = { ...yearLog[index]!, outcome, outcomeTone };
+  return { ...state, world: { ...state.world, yearLog } };
+}
+
+function resolveClutchShot(state: CareerState, rng: Rng): CareerState {
+  const { player } = state;
+  const badge = player.badges.includes("clutch") ? 0.1 : 0;
+  const role = player.role === "star" || player.role === "franchise" ? 0.05 : 0;
+  const chance = clamp(
+    0.34 + (player.attributes.clutch - 50) / 180 + (player.form - 50) / 300 - player.fatigue / 500 + badge + role,
+    0.2,
+    0.82,
+  );
+  const made = rng.fork("clutch-shot").chance(chance);
+  const next: CareerState = {
+    ...state,
+    player: markFired({
+      ...player,
+      roleBias: clamp(player.roleBias + 1, -2, 2),
+      fatigue: clamp(player.fatigue + 12, 0, 95),
+      confidence: clamp(player.confidence + (made ? 9 : -7), 20, 95),
+      morale: clamp(player.morale + (made ? 6 : -5), 10, 95),
+    }, "playoff_push"),
+  };
+  return withChoiceOutcome(
+    next,
+    made ? "La metiste. El pabellón se vino abajo y el equipo cerró el partido." : "No entró. Te quedaste con el tiro y con el ruido del fallo.",
+    made ? "good" : "bad",
+  );
+}
 
 function train(state: CareerState, keys: AttributeKey[], amount: number): CareerState {
   return {

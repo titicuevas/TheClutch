@@ -23,6 +23,17 @@ Abre [http://localhost:3000](http://localhost:3000) y empieza una carrera. La UI
 
 Motor en consola (sin UI): `pnpm sim -- --seed demo-01`
 
+## Despliegue en Railway
+
+El repositorio incluye `railway.json` y el healthcheck `/api/health`.
+
+1. Enlaza el repositorio a un servicio Railway.
+2. Railway ejecutará `pnpm build` y `pnpm start` desde la raíz.
+3. Configura `NEXT_PUBLIC_SITE_URL` con el dominio definitivo. Si se omite, la app usa `RAILWAY_PUBLIC_DOMAIN`.
+4. Comprueba `/api/health`, `/robots.txt`, `/sitemap.xml` y la imagen `/opengraph-image`.
+
+La alpha no necesita Postgres: las carreras siguen guardándose localmente en el navegador.
+
 ## Stack previsto
 
 Next.js · React · TypeScript · Tailwind CSS · PostgreSQL · engine TS desacoplado · Vitest · Playwright

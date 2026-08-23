@@ -17,7 +17,7 @@ import {
   type Position,
 } from "@theclutch/engine";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FLAG, crestStyle, jerseyNumber, teamForOption } from "../lib/crest";
 import {
   ARCHETYPE_LABEL,
@@ -375,6 +375,10 @@ function DecisionCard({
   live?: CareerViewModel["midseason"];
   onChoose: (id: string) => void;
 }) {
+  const cardRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    cardRef.current?.focus({ preventScroll: true });
+  }, [decision.id]);
   const four = decision.options.length === 4;
   const two = decision.options.length === 2;
   const draftBeat =
@@ -383,6 +387,8 @@ function DecisionCard({
 
   return (
     <section
+      ref={cardRef}
+      tabIndex={-1}
       data-testid="decision-card"
       aria-labelledby="decision-title"
       aria-describedby="decision-body"

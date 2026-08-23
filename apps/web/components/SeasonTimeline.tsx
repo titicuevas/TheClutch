@@ -1,7 +1,7 @@
 "use client";
 
 import { formatNationalChip, formatPlayoffLine, formatTeamRecord, formatTitleLine, type CareerViewModel, type SeasonRecord } from "@theclutch/engine";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   AWARD_LABEL,
   BADGE_LABEL,
@@ -36,11 +36,29 @@ type Props = {
 
 export function SeasonTimeline({ history, stints, midseason, year, focusYear }: Props) {
   const blocks = groupByClub(history, midseason, year);
+  const [expandedYear, setExpandedYear] = useState(focusYear ?? history.at(-1)?.year);
 
   if (!blocks.length) return null;
 
   return (
     <section data-testid="career-timeline">
+      <div className="sticky top-2 z-10 mb-4 flex items-center gap-3 rounded-xl border border-line bg-ink/95 p-2.5 shadow-lg backdrop-blur">
+        <label htmlFor="season-jump" className="text-xs font-semibold uppercase tracking-wider text-mute">Ir al año</label>
+        <select
+          id="season-jump"
+          defaultValue={focusYear ?? history.at(-1)?.year}
+          onChange={(event) => {
+            const selected = Number(event.target.value);
+            setExpandedYear(selected);
+            requestAnimationFrame(() => document.getElementById(`season-${selected}`)?.scrollIntoView({ block: "center" }));
+          }}
+          className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-ink px-3 text-cream"
+        >
+          {[...history].reverse().map((season) => (
+            <option key={season.year} value={season.year}>Temporada {season.year} · {season.teamName}</option>
+          ))}
+        </select>
+      </div>
       <ol data-testid="season-log" className="flex flex-col gap-5">
         {blocks.map((block) => {
           const meta = stints.find((stint) => stint.teamId === block.teamId && stint.fromYear === block.seasons[0]?.year);
@@ -68,6 +86,8 @@ export function SeasonTimeline({ history, stints, midseason, year, focusYear }: 
                     key={season.year}
                     season={season}
                     focused={season.year === focusYear}
+                    expanded={season.year === expandedYear}
+                    onToggle={() => setExpandedYear((current) => current === season.year ? undefined : season.year)}
                     marker={
                       index === block.seasons.length - 1 && !block.midseason ? "bg-gold" : "bg-line"
                     }
@@ -127,39 +147,35 @@ function groupByClub(history: SeasonRecord[], midseason: Midseason | undefined, 
 function SeasonRow({
   season,
   focused,
+  expanded,
+  onToggle,
   marker,
 }: {
   season: SeasonRecord;
   focused: boolean;
+  expanded: boolean;
+  onToggle: () => void;
   marker: string;
 }) {
-  const ref = useRef<HTMLLIElement>(null);
-
-  useEffect(() => {
-    if (!focused || !ref.current) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    ref.current.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
-  }, [focused]);
-
   return (
     <li
-      ref={ref}
+      id={`season-${season.year}`}
       data-testid={`season-row-${season.year}`}
       data-focus={focused ? "true" : undefined}
       aria-current={focused ? "true" : undefined}
       className="relative pb-3 last:pb-0"
     >
       <span className={`absolute -left-[21px] top-2.5 h-2.5 w-2.5 rounded-full ${focused ? "bg-gold" : marker}`} />
-      <SeasonYear season={season} focused={focused} />
+      <SeasonYear season={season} focused={focused} expanded={expanded} onToggle={onToggle} />
     </li>
   );
 }
 
-function SeasonYear({ season, focused }: { season: SeasonRecord; focused?: boolean }) {
+function SeasonYear({ season, focused, expanded, onToggle }: { season: SeasonRecord; focused?: boolean; expanded: boolean; onToggle: () => void }) {
   return (
     <article className={`surface rounded-xl border px-3 py-2.5 ${focused ? "border-gold/55" : "border-line"}`}>
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-gold">Temporada {season.year}</p>
+      <button type="button" onClick={onToggle} aria-expanded={expanded} className="flex min-h-11 w-full items-center justify-between gap-2 text-left">
+        <span className="text-xs uppercase tracking-[0.2em] text-gold">Temporada {season.year}</span>
         <span
           className={`font-display text-xl leading-none ${
             season.grade?.mark === "S" || season.grade?.mark === "A"
@@ -169,14 +185,14 @@ function SeasonYear({ season, focused }: { season: SeasonRecord; focused?: boole
                 : "text-cream"
           }`}
         >
-          {season.grade?.mark ?? ""}
+          {season.grade?.mark ?? ""} <span aria-hidden className="ml-1 font-sans text-sm text-mute">{expanded ? "−" : "+"}</span>
         </span>
-      </div>
+      </button>
       <p className="mt-0.5 text-xs text-mute">
         {season.age} años · {ROLE_LABEL[season.role]} · {season.overall} OVR ·{" "}
         {COMPETITION_LABEL[season.competitionId] ?? season.competitionId}
       </p>
-      <p className="mt-2 font-display text-xl tracking-wide">
+      {expanded ? <div data-testid={`season-details-${season.year}`}><p className="mt-2 font-display text-xl tracking-wide">
         {season.stats.pts.toFixed(1)}
         <span className="text-[10px] font-sans text-mute"> PTS </span>
         {season.stats.ast.toFixed(1)}
@@ -256,6 +272,7 @@ function SeasonYear({ season, focused }: { season: SeasonRecord; focused?: boole
           </span>
         ) : null}
       </div>
+      </div> : null}
     </article>
   );
 }

@@ -262,6 +262,8 @@ export type SeasonChoice = {
   kind: DecisionKind;
   title: string;
   optionLabel: string;
+  outcome?: string;
+  outcomeTone?: "good" | "bad" | "neutral";
 };
 
 export type DecisionKind = "training" | "event" | "draft" | "contract" | "trade" | "retire" | "path";
@@ -442,6 +444,10 @@ export type LegacyReport = {
   silvers: number;
   bronzes: number;
   moments: MomentId[];
+  bestSeason?: { year: number; teamName: string; grade: SeasonMark; score: number };
+  primaryClub?: { id: string; name: string; seasons: number };
+  definingChoice?: SeasonChoice;
+  clutchRecord: { made: number; missed: number };
   legacyScore: number;
   band: LegacyBand;
   mode: CareerMode;

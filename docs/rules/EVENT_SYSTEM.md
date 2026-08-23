@@ -180,7 +180,7 @@ Objetivo: **20–40 eventos** de alta calidad, no 400 mediocres.
 | `captain_c` | rol `franchise`, 8+ años, chip `loved`; una vez | el brazalete. Llevarla vs uno más. No es `locker_voice` (eso es a mitad). Estrella sin la C de club no lo ve |
 | `sixth_heat` | `sixth_man`, edad ≤ 25, ≥15 PTS a mitad; una vez | pedir el cinco vs seguir de bomba. Banco gordo sigue `unhappy_minutes`; veterano ≥ 28 sigue `vet_minutes`. No es must |
 | `deal_year` | titular o estrella, último año, ego o ambition ≥ 62, no formación; una vez | jugarlo vs forzar la salida a mitad. El mercado estructural no lo sustituye. No es `agent_conflict` |
-| `playoff_push` | titular o estrella, contention ≥ 80, fatiga media; una vez | cargar vs guardar piernas. Franquicia en Mayo sigue siendo `load_manage`. Fatiga extrema sigue `lockout_fatigue`. No es must |
+| `playoff_push` | titular o estrella, contention ≥ 80, fatiga media; una vez | **decisión clutch** ante un partido clave: pedir la última bola o jugar para el equipo. El desenlace posterior usa atributo/badge `clutch`, forma, rol y RNG acotado; nunca se muestra un porcentaje ni se controla la posesión. Franquicia en Mayo sigue siendo `load_manage`. Fatiga extrema sigue `lockout_fatigue`. No es must |
 
 Cada evento nuevo: archivo en `packages/content/events/`, tests de condición, y una línea en este catálogo o un índice generado. No copypastear 50 variantes que son el mismo evento con otro adjetivo.
 

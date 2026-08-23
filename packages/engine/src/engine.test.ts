@@ -2024,12 +2024,15 @@ describe("catálogo restante", () => {
     const ready = playoffPushState();
     const decision = pickMidseasonEvent(ready, rngThatPicks("playoff_push", (rng) => pickMidseasonEvent(ready, rng)));
     expect(decision?.id).toBe("playoff_push");
-    expect(decision?.title).toBe("La pelea");
+    expect(decision?.title).toBe("La última bola");
     expect(decision?.options.map((option) => option.id)).toEqual(["hunt", "save"]);
 
     const hunted = dispatch({ ...ready, pendingDecision: decision }, { type: "CHOOSE", optionId: "hunt" }).state;
     expect(hunted.player.flags.firedOnce).toContain("playoff_push");
+    expect(hunted.history.at(-1)?.choices.find((choice) => choice.title === "La última bola")?.outcome).toBeTruthy();
+    expect(["good", "bad"]).toContain(hunted.history.at(-1)?.choices.find((choice) => choice.title === "La última bola")?.outcomeTone);
     const saved = dispatch({ ...ready, pendingDecision: decision }, { type: "CHOOSE", optionId: "save" }).state;
+    expect(saved.history.at(-1)?.choices.find((choice) => choice.title === "La última bola")?.outcomeTone).toBe("neutral");
     expect(saved.player.roleBias).toBeLessThan(hunted.player.roleBias);
     expect(hunted.history.at(-1)!.stats.minutes).toBeGreaterThan(saved.history.at(-1)!.stats.minutes);
     expect(pickMidseasonEvent(loadManageState(), rngThatPicks("load_manage", (rng) => pickMidseasonEvent(loadManageState(), rng)))?.id).toBe(
@@ -2038,6 +2041,24 @@ describe("catálogo restante", () => {
     expect(pickMidseasonEvent(playoffPushState({ contention: 50 }), createRng("force-push"))?.id).not.toBe(
       "playoff_push",
     );
+  });
+
+  it("el clutch alto gana más últimas bolas y la misma seed repite el desenlace", () => {
+    const run = (level: number, seed: string) => {
+      const ready = playoffPushState();
+      const decision = pickMidseasonEvent(ready, rngThatPicks("playoff_push", (rng) => pickMidseasonEvent(ready, rng)))!;
+      const state = {
+        ...ready,
+        meta: { ...ready.meta, runSeed: seed },
+        player: { ...ready.player, attributes: { ...ready.player.attributes, clutch: level }, form: level, badges: level >= 90 ? ["clutch" as const] : [] },
+        pendingDecision: decision,
+      };
+      return dispatch(state, { type: "CHOOSE", optionId: "hunt" }).state.history.at(-1)!.choices.find((choice) => choice.title === "La última bola")!;
+    };
+    const high = Array.from({ length: 120 }, (_, index) => run(95, `clutch-${index}`)).filter((choice) => choice.outcomeTone === "good").length;
+    const low = Array.from({ length: 120 }, (_, index) => run(45, `clutch-${index}`)).filter((choice) => choice.outcomeTone === "good").length;
+    expect(high).toBeGreaterThan(low + 25);
+    expect(run(95, "same-seed")).toEqual(run(95, "same-seed"));
   });
 });
 

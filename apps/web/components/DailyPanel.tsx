@@ -99,7 +99,7 @@ export function DailyPanel() {
   }
 
   return (
-    <section className="surface flex flex-col gap-3 rounded-3xl border border-gold/30 p-4">
+    <section id="daily" className="surface scroll-mt-4 flex flex-col gap-3 rounded-3xl border border-gold/30 p-4">
       <p className="text-xs uppercase tracking-[0.3em] text-gold">Daily</p>
       {preview && iso ? (
         <>

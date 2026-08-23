@@ -801,11 +801,11 @@ function pickEvent(
       make: () => ({
         id: "playoff_push",
         kind: "event",
-        title: "La pelea",
-        body: `${world.team.name} está en la pelea. Cargar minutos o guardar piernas. El resto del año cambia.`,
+        title: "La última bola",
+        body: `${world.team.name} se juega el cruce en un partido clave. Puedes pedir la posesión decisiva o confiar en el sistema. Tu clutch, forma y rol pesan; la suerte también.`,
         options: [
-          { id: "hunt", label: "Cargar minutos", hint: "Más uso ahora; más carga" },
-          { id: "save", label: "Guardar piernas", hint: "Menos este tramo; fresco al cierre" },
+          { id: "hunt", label: "Dame la última", hint: "Más protagonismo y presión; más fatiga" },
+          { id: "save", label: "Jugar para el equipo", hint: "Menos foco; más piernas para el cruce" },
         ],
       }),
     });

@@ -123,6 +123,16 @@ export function SeasonRecap({
                   <span className="text-gold">{KIND_LABEL[choice.kind] ?? choice.kind}</span>
                   <span className="text-mute"> · {choice.title} → </span>
                   <span className="font-semibold">{choice.optionLabel}</span>
+                  {choice.outcome ? (
+                    <span
+                      className={`mt-2 block border-t border-white/10 pt-2 ${
+                        choice.outcomeTone === "good" ? "text-good" : choice.outcomeTone === "bad" ? "text-clutch" : "text-cream/80"
+                      }`}
+                      aria-live="polite"
+                    >
+                      {choice.outcome}
+                    </span>
+                  ) : null}
                 </li>
               ))}
             </ul>

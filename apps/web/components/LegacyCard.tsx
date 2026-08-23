@@ -72,6 +72,19 @@ export function LegacyCard({
         <p className="mt-6 text-sm text-mute">
           {report.seasons} temporadas · Pico OVR {report.peakOverall} · Ganado {formatWage(report.earnings)}
         </p>
+        <dl className="mt-5 grid grid-cols-2 gap-2 text-sm">
+          {report.bestSeason ? <div className="rounded-xl border border-white/10 bg-ink/45 p-3"><dt className="text-xs uppercase tracking-wider text-mute">Mejor año</dt><dd className="mt-1 font-semibold">T{report.bestSeason.year} · {report.bestSeason.grade} ({report.bestSeason.score})</dd><dd className="truncate text-xs text-mute">{report.bestSeason.teamName}</dd></div> : null}
+          {report.primaryClub ? <div className="rounded-xl border border-white/10 bg-ink/45 p-3"><dt className="text-xs uppercase tracking-wider text-mute">Tu club</dt><dd className="mt-1 truncate font-semibold">{report.primaryClub.name}</dd><dd className="text-xs text-mute">{report.primaryClub.seasons} temporadas</dd></div> : null}
+        </dl>
+        {report.clutchRecord.made + report.clutchRecord.missed > 0 ? (
+          <p className="mt-4 text-sm text-gold">Momentos clutch · {report.clutchRecord.made} dentro · {report.clutchRecord.missed} fuera</p>
+        ) : null}
+        {report.definingChoice?.outcome ? (
+          <blockquote className={`mt-4 border-l-2 pl-3 text-sm leading-relaxed ${report.definingChoice.outcomeTone === "good" ? "border-good text-good" : report.definingChoice.outcomeTone === "bad" ? "border-clutch text-clutch" : "border-gold text-cream/80"}`}>
+            <span className="block text-xs uppercase tracking-wider text-mute">El corte que quedó</span>
+            {report.definingChoice.outcome}
+          </blockquote>
+        ) : null}
         <p className="font-display mt-4 text-3xl">
           {report.ppg.toFixed(1)} / {report.apg.toFixed(1)} / {report.rpg.toFixed(1)} / {report.bpg.toFixed(1)}
         </p>
@@ -85,6 +98,25 @@ export function LegacyCard({
               </span>
             ))}
           </div>
+        ) : null}
+        {report.clubStints.some((club) => club.titles.length > 0) ? (
+          <section className="mt-6" aria-labelledby="palmares-club">
+            <h2 id="palmares-club" className="text-xs uppercase tracking-[0.25em] text-mute">
+              Dónde levantaste los títulos
+            </h2>
+            <ul className="mt-3 space-y-2">
+              {report.clubStints.filter((club) => club.titles.length > 0).map((club) => (
+                <li key={`${club.teamId}-${club.fromYear}`} className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink/45 p-2.5">
+                  <TeamCrest teamId={club.teamId} teamName={club.teamName} size={30} />
+                  <span className="min-w-0 flex-1 text-sm">
+                    <span className="block truncate font-semibold">{club.teamName}</span>
+                    <span className="text-mute">T{club.fromYear}–T{club.toYear}</span>
+                  </span>
+                  <TitleLine titles={club.titles} text={formatTitleLine(club.titles)} />
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
         <p className="mt-5 text-sm leading-relaxed text-cream/90">
           {titles ? <TitleLine titles={report.titles} text={titles} /> : "Sin títulos"}

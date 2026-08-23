@@ -138,6 +138,12 @@ export function calculateLegacy(state: CareerState): LegacyReport {
   const moments = collectMoments(state);
   score += moments.length * MOMENT_SCORE;
 
+  const best = [...history].sort((a, b) => b.grade.score - a.grade.score)[0];
+  const clubStints = collectClubStints(history);
+  const primary = [...clubStints].sort((a, b) => b.seasons - a.seasons || b.titles.length - a.titles.length)[0];
+  const clutchChoices = history.flatMap((season) => season.choices).filter((choice) => choice.title === "La última bola");
+  const definingChoice = [...history].reverse().flatMap((season) => [...season.choices].reverse()).find((choice) => choice.outcome);
+
   return {
     name: [player.firstName, player.lastName].filter(Boolean).join(" "),
     position: player.position,
@@ -154,7 +160,7 @@ export function calculateLegacy(state: CareerState): LegacyReport {
       player.spent,
     ),
     teams,
-    clubStints: collectClubStints(history),
+    clubStints,
     titles,
     awards,
     badges: player.badges,
@@ -163,6 +169,13 @@ export function calculateLegacy(state: CareerState): LegacyReport {
     silvers,
     bronzes,
     moments,
+    ...(best ? { bestSeason: { year: best.year, teamName: best.teamName, grade: best.grade.mark, score: best.grade.score } } : {}),
+    ...(primary ? { primaryClub: { id: primary.teamId, name: primary.teamName, seasons: primary.seasons } } : {}),
+    ...(definingChoice ? { definingChoice } : {}),
+    clutchRecord: {
+      made: clutchChoices.filter((choice) => choice.outcomeTone === "good").length,
+      missed: clutchChoices.filter((choice) => choice.outcomeTone === "bad").length,
+    },
     legacyScore: Math.round(score),
     band: bandFromScore(score),
     mode: state.meta.mode,

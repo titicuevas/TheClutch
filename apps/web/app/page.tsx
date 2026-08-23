@@ -1,6 +1,9 @@
 import { DailyPanel } from "../components/DailyPanel";
 import { StartForm } from "../components/StartForm";
 import { TeamCrest } from "../components/TeamCrest";
+import Link from "next/link";
+
+export const metadata = { title: "Juega gratis", description: "Empieza una carrera de baloncesto en segundos, toma decisiones y construye tu legado." };
 
 const PREVIEW = [
   { id: "tm_harbor", name: "Harbor Wolves" },
@@ -30,6 +33,7 @@ export default function HomePage() {
         <p className="relative mt-4 max-w-[20rem] text-sm leading-relaxed text-mute">
           Tú eres el jugador. Un botón simula el año. Los giros te paran.
         </p>
+        <Link href="#daily" className="btn-primary relative mt-5 flex h-14 w-full items-center justify-center text-lg sm:w-64">Jugar ahora</Link>
         <div className="relative mt-5 flex items-center gap-2">
           {PREVIEW.map((club) => (
             <TeamCrest key={club.id} teamId={club.id} teamName={club.name} size={44} />
@@ -38,6 +42,16 @@ export default function HomePage() {
       </header>
 
       <DailyPanel />
+
+      <section id="como-jugar" className="surface rounded-3xl border border-line p-5">
+        <p className="text-xs uppercase tracking-[0.3em] text-gold">Cómo se juega</p>
+        <h2 className="font-display mt-2 text-3xl">Una carrera en tres gestos</h2>
+        <ol className="mt-4 grid gap-3 text-sm text-mute sm:grid-cols-3">
+          <li><strong className="block text-cream">1. Crea</strong>Una carta única.</li>
+          <li><strong className="block text-cream">2. Decide</strong>Draft, equipo y momentos clutch.</li>
+          <li><strong className="block text-cream">3. Deja legado</strong>Títulos, premios y clubes.</li>
+        </ol>
+      </section>
 
       <StartForm />
 

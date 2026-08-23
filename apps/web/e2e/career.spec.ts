@@ -83,9 +83,7 @@ test.describe("carrera happy path", () => {
     await expect(page.getByTestId("identity-strip")).toContainText("$");
     await expect(page.getByTestId("identity-strip")).toContainText("min");
     await expect(page.getByTestId("career-card")).not.toContainText("Forma");
-    const nameBox = await page.getByTestId("player-name").boundingBox();
-    const rowBox = await lastYear.boundingBox();
-    expect(nameBox && rowBox && rowBox.y - nameBox.y < 180).toBeTruthy();
+    await expect(page.getByLabel("Ir al año")).toHaveValue("1");
     await expect(page.getByTestId("season-cta")).toBeVisible();
     await expect(page.getByRole("button", { name: "Retirarse" })).toHaveCount(0);
     await page.reload();
