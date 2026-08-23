@@ -37,7 +37,7 @@ export async function playUntil(page: Page, testId: "season-recap" | "legacy-car
     }
 
     const decision = page.getByTestId("decision-card");
-    if (await decision.isVisible().catch(() => false)) {
+    if (await decision.count()) {
       await decision.locator("button").first().click();
       continue;
     }
@@ -47,6 +47,11 @@ export async function playUntil(page: Page, testId: "season-recap" | "legacy-car
       await cta.click();
       continue;
     }
+
+    const nextState = page.locator(
+      '[data-testid="decision-card"], [data-testid="season-cta"], [data-testid="season-recap"], [data-testid="legacy-card"]',
+    ).first();
+    if (await nextState.waitFor({ state: "attached", timeout: 2_000 }).then(() => true).catch(() => false)) continue;
 
     throw new Error(`UI atascada en el paso ${step}`);
   }

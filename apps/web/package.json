@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "@theclutch/engine": "workspace:*",
-    "next": "^15.1.6",
+    "next": "^16.3.2",
     "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
