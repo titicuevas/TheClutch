@@ -16,6 +16,7 @@ import { ARCHETYPE_LABEL, NATION_LABEL, POSITION_LABEL, SCOUT_LABEL } from "../l
 import { assignedStorageKey, loadOfficialDaily, loadRun } from "../lib/persist";
 import { playHref } from "../lib/playHref";
 import { generateRunSeed } from "../lib/seed";
+import { track } from "../lib/telemetry";
 
 function formatReset(ms: number): string {
   if (ms <= 0) return "Reset ahora";
@@ -75,6 +76,7 @@ export function DailyPanel() {
 
   function playDaily() {
     if (!iso) return;
+    track("daily_start");
     const official = loadOfficialDaily(iso);
     const saved = official ? loadRun(assignedStorageKey("daily", iso, official.runSeed)) : null;
     const run = saved && !saved.retired ? official!.runSeed : generateRunSeed();
@@ -89,6 +91,7 @@ export function DailyPanel() {
       return;
     }
     setCodeError("");
+    track("challenge_start");
     router.push(
       playHref({
         mode: "challenge",
@@ -109,11 +112,12 @@ export function DailyPanel() {
           <h2 data-testid="daily-name" className="font-display text-3xl leading-none text-cream">
             {preview.vm.name}
           </h2>
-          <p className="text-sm text-mute">
+          <p className="text-sm leading-relaxed text-mute">
             {FLAG[preview.vm.nationality] ?? ""} {POSITION_LABEL[preview.vm.position] ?? preview.vm.position} ·{" "}
             {NATION_LABEL[preview.vm.nationality] ?? preview.vm.nationality} · {preview.vm.heightCm} cm ·{" "}
             {ARCHETYPE_LABEL[preview.vm.archetype] ?? preview.vm.archetype} · {SCOUT_LABEL[preview.vm.potentialBand]}
           </p>
+          <p className="text-xs text-cream/80">Misma carta para todos hoy · una carrera completa · sin ranking todavía</p>
           {preview.code ? (
             <p className="flex flex-wrap items-center gap-2 font-mono text-sm text-gold">
               <span data-testid="daily-code">{preview.code}</span>

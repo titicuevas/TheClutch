@@ -92,11 +92,9 @@ Ranking oficial necesita identidad. El loop pide cero fricción.
 
 ### D-01 Nombre de producto
 
-**OPEN**
+**LOCKED: TheClutch**
 
-Opciones: TheClutch, BUZZER, otro.
-
-Hasta cerrar: repo `TheClutch`, UI puede usar un placeholder. No renombrar packages dos veces.
+El nombre del repositorio y del producto público es **TheClutch**. La alpha ya tiene identidad visual, dominio, metadatos y códigos compartibles bajo este nombre; cambiarlo ahora fragmentaría reconocimiento y SEO sin mejorar el loop. `BUZZER` queda descartado. Los identificadores internos no necesitan repetir la marca.
 
 ### D-02 Alcance del creador de jugador en Free
 

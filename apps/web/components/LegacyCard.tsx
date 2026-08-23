@@ -16,6 +16,7 @@ import { FLAG, crestStyle } from "../lib/crest";
 import { BADGE_LABEL, LEGACY_BAND, NATION_LABEL, POSITION_LABEL } from "../lib/labels";
 import { TitleLine } from "./Marks";
 import { TeamCrest } from "./TeamCrest";
+import { track } from "../lib/telemetry";
 
 export function LegacyCard({
   report,
@@ -137,11 +138,11 @@ export function LegacyCard({
         ) : null}
       </div>
       <div className="mt-10">
-        <Link href="/" className="btn-primary flex h-14 items-center justify-center text-lg">
+        <Link href="/" onClick={() => track("replay_start")} className="btn-primary flex h-14 items-center justify-center text-lg">
           Otra carrera
         </Link>
         {onFunRun ? (
-          <button type="button" onClick={onFunRun} className="mt-3 min-h-11 w-full py-2 text-sm text-gold">
+          <button type="button" onClick={() => { track("replay_start"); onFunRun(); }} className="mt-3 min-h-11 w-full py-2 text-sm text-gold">
             Otra suerte
           </button>
         ) : null}

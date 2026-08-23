@@ -1,12 +1,16 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useEffect } from "react";
+import { track } from "../lib/telemetry";
 
 export function FeedbackForm() {
   const [status, setStatus] = useState("");
+  useEffect(() => track("feedback_open"), []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    track("feedback_prepare");
     const form = new FormData(event.currentTarget);
     const text = [
       "FEEDBACK THECLUTCH",

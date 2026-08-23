@@ -47,4 +47,4 @@ Si una regla importante cambia: proponer → justificar → **actualizar el doc 
 ## Nombres
 
 - **TheClutch**: repo y código. **LOCKED**.
-- **Producto (UI)**: **OPEN** (D-01). Candidato: BUZZER. No espalmar brand en ids.
+- **Producto (UI)**: **TheClutch**. **LOCKED** en D-01. Los ids técnicos siguen sin prefijos de marca innecesarios.

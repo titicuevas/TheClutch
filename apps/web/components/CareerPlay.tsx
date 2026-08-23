@@ -39,6 +39,7 @@ import { LegacyCard } from "./LegacyCard";
 import { SeasonRecap } from "./SeasonRecap";
 import { SeasonTimeline } from "./SeasonTimeline";
 import { TeamCrest } from "./TeamCrest";
+import { track } from "../lib/telemetry";
 
 type Props = {
   mode?: CareerMode;
@@ -107,6 +108,13 @@ export function CareerPlay({
 
   const vm = useMemo(() => (state ? getViewModel(state) : null), [state]);
   const legacy = state?.retired ? calculateLegacy(state) : null;
+  const finishedTracked = useRef(false);
+  useEffect(() => {
+    if (legacy && !finishedTracked.current) {
+      finishedTracked.current = true;
+      track("career_finished");
+    }
+  }, [legacy]);
   const canForce = state ? shouldForceRetire(state) || state.history.length >= 8 : false;
   const canReroll =
     Boolean(onReroll) &&

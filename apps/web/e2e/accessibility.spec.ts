@@ -7,7 +7,7 @@ for (const viewport of [{ name: "móvil", width: 393, height: 852 }, { name: "ta
     await gotoFresh(page, "/");
     await dismissDevChrome(page);
     await expect(page.getByRole("heading", { level: 1, name: "THE CLUTCH" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Jugar ahora" })).toBeInViewport();
+    await expect(page.getByRole("link", { name: "Ver el reto de hoy" })).toBeInViewport();
     await expect(page.getByLabel("Nombre")).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Enlaces del sitio" })).toBeVisible();
     const undersized = await page.locator("button, a, input, select, textarea").evaluateAll((nodes) => nodes.filter((node) => {
@@ -27,4 +27,17 @@ test("el formulario de feedback explica el envío y tiene etiquetas", async ({ p
   await expect(page.getByLabel("¿Dónde estabas?")).toBeVisible();
   await expect(page.getByLabel("¿Qué mejorarías?")).toBeVisible();
   await expect(page.getByRole("button", { name: "Preparar feedback" })).toBeVisible();
+});
+
+test("manifest, service worker y telemetría mínima responden", async ({ page, request }) => {
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.ok()).toBeTruthy();
+  expect((await manifest.json()).name).toContain("TheClutch");
+  expect((await request.get("/sw.js")).ok()).toBeTruthy();
+  const accepted = await request.post("/api/telemetry", { data: { event: "landing_view", viewport: "mobile" } });
+  expect(accepted.status()).toBe(204);
+  const rejected = await request.post("/api/telemetry", { data: { event: "player_name", viewport: "mobile" } });
+  expect(rejected.status()).toBe(400);
+  await gotoFresh(page, "/");
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "/manifest.webmanifest");
 });

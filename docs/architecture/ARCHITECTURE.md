@@ -204,6 +204,8 @@ Bloques:
 - Componentes tontos respecto al juego: reciben view models.
 - Un hook/store `useCareer()` habla con el engine en cliente y sincroniza al servidor en puntos de control (fin de temporada / fin de carrera). No cada comando, al menos al inicio.
 - Accesibilidad: targets 44px, contraste, foco visible, no depender del color para rol/forma. Móvil y tablet: una columna; las decisiones son la misma carta, no un menú extra.
+- La pre-alpha puede emitir telemetría first-party de embudo (`landing_view`, inicio por modo, carrera terminada, replay y feedback). **Sin cookies, cuenta, nombre de jugador, seeds, decisiones ni identificador persistente.** El endpoint solo valida una lista cerrada y escribe eventos agregables en logs; almacenamiento analítico duradero requiere documentarse antes.
+- PWA ligera: manifest, iconos propios y service worker network-first. Nunca cachear ni enviar `localStorage`; una actualización no debe borrar carreras.
 
 ## 7. Backend
 

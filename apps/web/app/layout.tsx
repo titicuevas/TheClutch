@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SiteFooter } from "../components/SiteFooter";
 import { siteUrl } from "../lib/siteUrl";
+import { PwaRegister } from "../components/PwaRegister";
 
 const display = Archivo_Black({
   weight: "400",
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
   description: "Crea un jugador, decide su carrera y descubre su legado en un simulador de baloncesto gratuito y rápido.",
   openGraph: { title: "TheClutch", description: "Tu carrera. Tus decisiones. Tu legado.", type: "website", locale: "es_ES", images: ["/opengraph-image"] },
   twitter: { card: "summary_large_image", title: "TheClutch", description: "Tu carrera. Tus decisiones. Tu legado.", images: ["/opengraph-image"] },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "TheClutch", statusBarStyle: "black-translucent" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="mx-auto min-h-dvh w-full max-w-md px-4 pb-8 pt-6 sm:max-w-xl md:max-w-2xl md:px-8">
           {children}
           <SiteFooter />
+          <PwaRegister />
         </div>
       </body>
     </html>

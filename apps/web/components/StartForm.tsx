@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react";
 import { FLAG } from "../lib/crest";
 import { HAND_LABEL, NATION_LABEL, POSITION_LABEL } from "../lib/labels";
 import { playHref } from "../lib/playHref";
+import { track } from "../lib/telemetry";
 
 const POSITIONS: Position[] = ["PG", "SG", "SF", "PF", "C"];
 const HANDS: Handed[] = ["right", "left"];
@@ -20,6 +21,7 @@ export function StartForm() {
 
   function play(event: FormEvent) {
     event.preventDefault();
+    track("free_start");
     const givenName = [firstName, lastName].map((part) => part.trim()).filter(Boolean).join(" ");
     router.push(
       playHref({
@@ -33,7 +35,8 @@ export function StartForm() {
   }
 
   return (
-    <form onSubmit={play} className="surface flex flex-col gap-2.5 rounded-3xl border border-line p-4">
+    <form id="free-career" onSubmit={play} className="surface scroll-mt-4 flex flex-col gap-2.5 rounded-3xl border border-line p-4">
+      <div><p className="text-xs uppercase tracking-[0.3em] text-gold">Carrera libre</p><h2 className="font-display mt-1 text-2xl">Tu carta, tu historia</h2></div>
       <p className="text-sm leading-relaxed text-mute">Nada es obligatorio. Si no eliges, sale una carta.</p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
