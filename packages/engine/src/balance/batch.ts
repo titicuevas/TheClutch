@@ -39,6 +39,7 @@ export type BalanceReport = {
   pctAllTime: number;
   pctLocalLegend: number;
   pctModerateInjury: number;
+  pctClutchDecision: number;
   pctUndraftedAllTeam: number;
   pctUndraftedAmericanAllTeam: number;
   p50Seasons: number;
@@ -54,6 +55,7 @@ export function runBalanceBatch(n: number, prefix = "batch"): BalanceReport {
   const firedCounts: number[] = [];
   let peak90 = 0;
   let moderate = 0;
+  let clutchDecision = 0;
   let undraftedN = 0;
   let undraftedAllTeam = 0;
   let undraftedAmericanAllTeam = 0;
@@ -87,6 +89,9 @@ export function runBalanceBatch(n: number, prefix = "batch"): BalanceReport {
     if (report.band === "all_time") allTime += 1;
     if (report.band === "local_legend") localLegend += 1;
     if (state.history.some((s) => s.injury?.severity === "moderate")) moderate += 1;
+    if (state.history.some((s) => s.choices.some((choice) => choice.title === "La última bola"))) {
+      clutchDecision += 1;
+    }
     const undrafted = !state.player.flags.drafted;
     if (undrafted) {
       undraftedN += 1;
@@ -124,6 +129,7 @@ export function runBalanceBatch(n: number, prefix = "batch"): BalanceReport {
     pctAllTime: allTime / n,
     pctLocalLegend: localLegend / n,
     pctModerateInjury: moderate / n,
+    pctClutchDecision: clutchDecision / n,
     pctUndraftedAllTeam: undraftedN === 0 ? 0 : undraftedAllTeam / undraftedN,
     pctUndraftedAmericanAllTeam: undraftedN === 0 ? 0 : undraftedAmericanAllTeam / undraftedN,
     p50Seasons: p50(seasonCounts),
@@ -155,7 +161,7 @@ export function formatBalanceReport(report: BalanceReport): string {
     `peak p50 ${report.p50Peak} · peak≥90 ${(report.pctPeak90 * 100).toFixed(1)}%`,
     `legacy p50 ${Math.round(report.p50Legacy)} · p90 ${Math.round(report.p90Legacy)} · Histórico ${(report.pctAllTime * 100).toFixed(1)}% · Leyenda local ${(report.pctLocalLegend * 100).toFixed(1)}%`,
     `temporadas p50 ${report.p50Seasons} · giros p50 ${report.p50FiredOnce}`,
-    `lesión moderate ${(report.pctModerateInjury * 100).toFixed(1)}% · undrafted All-Team ${(report.pctUndraftedAllTeam * 100).toFixed(1)}% · undrafted All-Team US ${(report.pctUndraftedAmericanAllTeam * 100).toFixed(1)}%`,
+    `lesión moderate ${(report.pctModerateInjury * 100).toFixed(1)}% · decisión clutch ${(report.pctClutchDecision * 100).toFixed(1)}% · undrafted All-Team ${(report.pctUndraftedAllTeam * 100).toFixed(1)}% · undrafted All-Team US ${(report.pctUndraftedAmericanAllTeam * 100).toFixed(1)}%`,
     "por posición (p50 PTS/AST/REB):",
     ...posLines,
     "PPG por banda de OVR:",

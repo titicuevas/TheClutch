@@ -2038,7 +2038,7 @@ describe("catálogo restante", () => {
     expect(pickMidseasonEvent(loadManageState(), rngThatPicks("load_manage", (rng) => pickMidseasonEvent(loadManageState(), rng)))?.id).toBe(
       "load_manage",
     );
-    expect(pickMidseasonEvent(playoffPushState({ contention: 50 }), createRng("force-push"))?.id).not.toBe(
+    expect(pickMidseasonEvent(playoffPushState({ contention: 67 }), createRng("force-push"))?.id).not.toBe(
       "playoff_push",
     );
   });

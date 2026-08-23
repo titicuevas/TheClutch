@@ -348,6 +348,7 @@ Antes de dar por buena una fórmula, el Simulation Agent debe poder responder:
 - % undrafted que llegan a All-Team (denominador = undrafted; se reporta también el recorte americano)
 - distribución de Legacy Score
 - tasa de lesión severe
+- % de carreras completas con la decisión `playoff_push` (objetivo 4–10%; máximo una vez)
 
 Esos tests viven en `packages/engine` como tests estadísticos con seed fija (tolerancia, no snapshot exacto de cada run). CI: `runBalanceBatch(80)`. Informe largo: `pnpm sim -- --batch --n 10000`.
 

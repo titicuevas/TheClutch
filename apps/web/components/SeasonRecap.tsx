@@ -118,8 +118,24 @@ export function SeasonRecap({
               {season.choices.map((choice, index) => (
                 <li
                   key={`${choice.kind}:${choice.optionLabel}:${index}`}
-                  className="rounded-xl border border-white/10 bg-ink px-3 py-2 text-sm"
+                  className={`rounded-xl border bg-ink px-3 py-2 text-sm ${
+                    choice.title === "La última bola" && choice.outcomeTone === "good"
+                      ? "border-good/50"
+                      : choice.title === "La última bola" && choice.outcomeTone === "bad"
+                        ? "border-clutch/60"
+                        : "border-white/10"
+                  }`}
                 >
+                  {choice.title === "La última bola" && choice.outcomeTone !== "neutral" ? (
+                    <span
+                      data-testid="clutch-outcome"
+                      className={`mb-1 block text-xs font-semibold uppercase tracking-widest ${
+                        choice.outcomeTone === "good" ? "text-good" : "text-clutch"
+                      }`}
+                    >
+                      Momento clutch · {choice.outcomeTone === "good" ? "Dentro" : "Fuera"}
+                    </span>
+                  ) : null}
                   <span className="text-gold">{KIND_LABEL[choice.kind] ?? choice.kind}</span>
                   <span className="text-mute"> · {choice.title} → </span>
                   <span className="font-semibold">{choice.optionLabel}</span>

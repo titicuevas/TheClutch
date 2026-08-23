@@ -788,7 +788,7 @@ function pickEvent(
     allow("playoff_push") &&
     !fired(state, "playoff_push") &&
     (player.role === "starter" || player.role === "star") &&
-    world.team.contention >= 80 &&
+    world.team.contention >= 68 &&
     player.fatigue >= 42 &&
     player.fatigue < 68 &&
     player.experience >= 2 &&
@@ -797,7 +797,7 @@ function pickEvent(
   ) {
     candidates.push({
       id: "playoff_push",
-      weight: 4,
+      weight: 9,
       make: () => ({
         id: "playoff_push",
         kind: "event",

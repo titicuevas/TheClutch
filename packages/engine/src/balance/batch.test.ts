@@ -15,6 +15,8 @@ describe("balance batch", () => {
     expect(report.pctPeak90).toBeLessThan(0.25);
     expect(report.pctModerateInjury).toBeGreaterThan(0.08);
     expect(report.pctModerateInjury).toBeLessThan(0.32);
+    expect(report.pctClutchDecision).toBeGreaterThan(0);
+    expect(report.pctClutchDecision).toBeLessThan(0.25);
     expect(report.p50Legacy).toBeGreaterThan(8000);
     expect(report.pctAllTime).toBeGreaterThan(0.02);
     expect(report.pctAllTime).toBeLessThan(0.28);
