@@ -21,11 +21,18 @@ test.describe("carrera happy path", () => {
     await expect(page.getByRole("button", { name: "Simular temporada" })).toHaveCount(0);
     await expect(page.getByTestId("decision-card")).toBeVisible();
     await expect(page.getByTestId("decision-card")).toContainText("¿Dónde empiezas?");
+    await expect(page.getByTestId("first-run-guide")).toContainText("Tu carrera en tres pasos");
+    await expect(page.getByTestId("first-run-guide")).toContainText("Simula temporadas");
     await expect(page.getByRole("button", { name: "Otra carta" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Seguir (hasta decisión)" })).toHaveCount(0);
 
+    const firstRecapEvent = page.waitForRequest((request) =>
+      request.url().endsWith("/api/telemetry") && request.postData()?.includes("first_recap_"),
+    );
     const steps = await playUntil(page, "season-recap", 30);
+    expect((await firstRecapEvent).postData()).toContain("first_recap_lt5");
     const recap = page.getByTestId("season-recap");
+    await expect(page.getByTestId("first-run-guide")).toHaveCount(0);
     await expect(recap).toContainText("Temporada 1");
     await expect(recap).toContainText("PTS");
     await expect(recap.getByTestId("season-grade")).toBeVisible();

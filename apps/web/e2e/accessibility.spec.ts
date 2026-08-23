@@ -36,6 +36,8 @@ test("manifest, observabilidad y telemetría mínima responden", async ({ page, 
   expect((await request.get("/sw.js")).ok()).toBeTruthy();
   const accepted = await request.post("/api/telemetry", { data: { event: "landing_view", viewport: "mobile" } });
   expect(accepted.status()).toBe(204);
+  const acceptedFirstRecap = await request.post("/api/telemetry", { data: { event: "first_recap_5_10", viewport: "mobile" } });
+  expect(acceptedFirstRecap.status()).toBe(204);
   const rejected = await request.post("/api/telemetry", { data: { event: "player_name", viewport: "mobile" } });
   expect(rejected.status()).toBe(400);
   const invalidFeedback = await request.post("/api/feedback", { data: { rating: 8, device: "móvil", moment: "Inicio", comment: "Prueba inválida" } });

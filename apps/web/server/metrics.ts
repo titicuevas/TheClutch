@@ -6,6 +6,11 @@ export type ObservabilityMetrics = {
   dailyStarts: number;
   freeStarts: number;
   challengeStarts: number;
+  firstRecaps: number;
+  firstRecapLt5: number;
+  firstRecap5To10: number;
+  firstRecap10To20: number;
+  firstRecap20Plus: number;
   careersFinished: number;
   replayStarts: number;
   feedbackPrepared: number;
@@ -19,6 +24,11 @@ const EMPTY_METRICS: ObservabilityMetrics = {
   dailyStarts: 0,
   freeStarts: 0,
   challengeStarts: 0,
+  firstRecaps: 0,
+  firstRecapLt5: 0,
+  firstRecap5To10: 0,
+  firstRecap10To20: 0,
+  firstRecap20Plus: 0,
   careersFinished: 0,
   replayStarts: 0,
   feedbackPrepared: 0,
@@ -37,6 +47,11 @@ export async function getObservabilityMetrics(): Promise<ObservabilityMetrics> {
         count(*) filter (where event = 'daily_start')::text as daily_starts,
         count(*) filter (where event = 'free_start')::text as free_starts,
         count(*) filter (where event = 'challenge_start')::text as challenge_starts,
+        count(*) filter (where event like 'first_recap_%')::text as first_recaps,
+        count(*) filter (where event = 'first_recap_lt5')::text as first_recap_lt5,
+        count(*) filter (where event = 'first_recap_5_10')::text as first_recap_5_10,
+        count(*) filter (where event = 'first_recap_10_20')::text as first_recap_10_20,
+        count(*) filter (where event = 'first_recap_20_plus')::text as first_recap_20_plus,
         count(*) filter (where event = 'career_finished')::text as careers_finished,
         count(*) filter (where event = 'replay_start')::text as replay_starts,
         count(*) filter (where event = 'feedback_prepare')::text as feedback_prepared
@@ -55,6 +70,11 @@ export async function getObservabilityMetrics(): Promise<ObservabilityMetrics> {
       dailyStarts: Number(funnel.daily_starts),
       freeStarts: Number(funnel.free_starts),
       challengeStarts: Number(funnel.challenge_starts),
+      firstRecaps: Number(funnel.first_recaps),
+      firstRecapLt5: Number(funnel.first_recap_lt5),
+      firstRecap5To10: Number(funnel.first_recap_5_10),
+      firstRecap10To20: Number(funnel.first_recap_10_20),
+      firstRecap20Plus: Number(funnel.first_recap_20_plus),
       careersFinished: Number(funnel.careers_finished),
       replayStarts: Number(funnel.replay_starts),
       feedbackPrepared: Number(funnel.feedback_prepared),

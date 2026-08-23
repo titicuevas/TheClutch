@@ -19,6 +19,7 @@ export default async function StatusPage() {
   const cards = [
     ["Visitas", metrics.landingViews],
     ["Carreras iniciadas", starts],
+    ["Primer recap", metrics.firstRecaps],
     ["Carreras terminadas", metrics.careersFinished],
     ["Feedback recibido", metrics.feedbackReceived],
     ["Errores de cliente", metrics.clientErrors],
@@ -42,9 +43,15 @@ export default async function StatusPage() {
             </dl>
             <div className="mt-5 space-y-2 text-sm text-mute">
               <p>Inicio desde visita: <strong className="text-cream">{percentage(starts, metrics.landingViews)}</strong></p>
+              <p>Primer recap desde inicio: <strong className="text-cream">{percentage(metrics.firstRecaps, starts)}</strong></p>
               <p>Finalización desde inicio: <strong className="text-cream">{percentage(metrics.careersFinished, starts)}</strong></p>
               <p>Repetición desde final: <strong className="text-cream">{percentage(metrics.replayStarts, metrics.careersFinished)}</strong></p>
             </div>
+            {metrics.firstRecaps ? (
+              <p className="mt-4 text-xs leading-relaxed text-mute">
+                Tiempo hasta el primer recap · &lt;5 min {percentage(metrics.firstRecapLt5, metrics.firstRecaps)} · 5–10 min {percentage(metrics.firstRecap5To10, metrics.firstRecaps)} · 10–20 min {percentage(metrics.firstRecap10To20, metrics.firstRecaps)} · 20+ min {percentage(metrics.firstRecap20Plus, metrics.firstRecaps)}
+              </p>
+            ) : null}
           </>
         )}
         <p className="mt-5 text-xs leading-relaxed text-mute">Solo se muestran totales agregados. No se publican comentarios, carreras ni datos individuales.</p>

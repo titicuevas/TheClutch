@@ -40,6 +40,7 @@ import { SeasonRecap } from "./SeasonRecap";
 import { SeasonTimeline } from "./SeasonTimeline";
 import { TeamCrest } from "./TeamCrest";
 import { track } from "../lib/telemetry";
+import type { TelemetryEvent } from "../lib/telemetrySchema";
 
 type Props = {
   mode?: CareerMode;
@@ -107,6 +108,34 @@ export function CareerPlay({
   }, [state, storageKey]);
 
   const vm = useMemo(() => (state ? getViewModel(state) : null), [state]);
+  const openedAt = useRef(Date.now());
+  const firstRecapTracked = useRef(false);
+  useEffect(() => {
+    openedAt.current = Date.now();
+    firstRecapTracked.current = false;
+    try {
+      const startKey = `tc:first-recap-start:${storageKey}`;
+      if (!sessionStorage.getItem(startKey)) sessionStorage.setItem(startKey, String(openedAt.current));
+    } catch {
+      /* La medición degrada al reloj de esta vista. */
+    }
+  }, [storageKey]);
+  useEffect(() => {
+    if (vm?.recap?.year !== 1 || firstRecapTracked.current) return;
+    firstRecapTracked.current = true;
+    const startKey = `tc:first-recap-start:${storageKey}`;
+    const doneKey = `tc:first-recap-done:${storageKey}`;
+    let startedAt = openedAt.current;
+    try {
+      if (sessionStorage.getItem(doneKey)) return;
+      const saved = Number(sessionStorage.getItem(startKey));
+      if (Number.isFinite(saved) && saved > 0) startedAt = saved;
+      sessionStorage.setItem(doneKey, "1");
+    } catch {
+      /* El evento sigue sin almacenamiento auxiliar. */
+    }
+    track(firstRecapEvent(Date.now() - startedAt));
+  }, [storageKey, vm?.recap?.year]);
   const legacy = state?.retired ? calculateLegacy(state) : null;
   const finishedTracked = useRef(false);
   useEffect(() => {
@@ -279,6 +308,8 @@ export function CareerPlay({
         </p>
       ) : null}
 
+      {vm.decision?.kind === "path" && !played ? <FirstRunGuide /> : null}
+
       {vm.decision ? (
         <>
           <DecisionCard decision={vm.decision} live={vm.midseason} onChoose={choose} />
@@ -343,6 +374,27 @@ export function CareerPlay({
       )}
     </div>
   );
+}
+
+function FirstRunGuide() {
+  return (
+    <aside data-testid="first-run-guide" className="rounded-2xl border border-gold/25 bg-gold/5 p-4" aria-labelledby="first-run-title">
+      <h2 id="first-run-title" className="text-sm font-semibold text-gold">Tu carrera en tres pasos</h2>
+      <ol className="mt-2 grid gap-1.5 text-sm leading-relaxed text-mute">
+        <li><strong className="text-cream">1. Elige camino.</strong> Club o universidad cambia tu entrada al draft.</li>
+        <li><strong className="text-cream">2. Simula temporadas.</strong> Cada año termina en un recap que puedes revisar.</li>
+        <li><strong className="text-cream">3. Asume los giros.</strong> Minutos, cuerpo, dinero y títulos rara vez caben en la misma opción.</li>
+      </ol>
+    </aside>
+  );
+}
+
+function firstRecapEvent(elapsedMs: number): TelemetryEvent {
+  const minutes = elapsedMs / 60_000;
+  if (minutes < 5) return "first_recap_lt5";
+  if (minutes < 10) return "first_recap_5_10";
+  if (minutes < 20) return "first_recap_10_20";
+  return "first_recap_20_plus";
 }
 
 function openOpening(state: CareerState): CareerState {
