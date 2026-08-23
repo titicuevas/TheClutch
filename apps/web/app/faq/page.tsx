@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Breadcrumbs } from "../../components/Breadcrumbs";
+import { MarketingHeader } from "../../components/MarketingHeader";
 
-export const metadata: Metadata = { title: "Preguntas frecuentes", description: "Respuestas sobre carreras, Daily, guardado, equipos y privacidad en TheClutch." };
+export const metadata: Metadata = {
+  title: "Preguntas frecuentes",
+  description: "Respuestas sobre carreras, Daily, guardado, equipos y privacidad en TheClutch.",
+};
 const faqs = [
   ["¿Es gratis?", "Sí. Esta alpha no incluye compras ni suscripciones."],
   ["¿Controlo los partidos?", "No. Tú tomas decisiones de carrera; el motor simula las temporadas y los partidos clave."],
@@ -13,6 +16,28 @@ const faqs = [
 ];
 
 export default function FaqPage() {
-  const jsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([name, text]) => ({ "@type": "Question", name, acceptedAnswer: { "@type": "Answer", text } })) };
-  return <main><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><Breadcrumbs current="FAQs" /><p className="text-xs uppercase tracking-[0.3em] text-gold">Ayuda</p><h1 className="font-display mt-2 text-4xl">Preguntas frecuentes</h1><div className="mt-6 space-y-3">{faqs.map(([q,a]) => <details key={q} className="surface rounded-2xl border border-line p-4"><summary className="cursor-pointer font-semibold">{q}</summary><p className="mt-3 text-sm leading-relaxed text-mute">{a}</p></details>)}</div><Link href="/#daily" className="btn-primary mt-7 flex h-14 items-center justify-center">Jugar ahora</Link></main>;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map(([name, text]) => ({
+      "@type": "Question",
+      name,
+      acceptedAnswer: { "@type": "Answer", text },
+    })),
+  };
+  return (
+    <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <MarketingHeader current="FAQs" eyebrow="Ayuda" title="Preguntas frecuentes" />
+      <div className="mt-6 space-y-3">
+        {faqs.map(([question, answer]) => (
+          <details key={question} className="surface rounded-2xl border border-line p-4">
+            <summary className="cursor-pointer font-semibold">{question}</summary>
+            <p className="mt-3 text-sm leading-relaxed text-mute">{answer}</p>
+          </details>
+        ))}
+      </div>
+      <Link href="/#daily" className="btn-primary mt-7 flex h-14 items-center justify-center">Jugar ahora</Link>
+    </main>
+  );
 }

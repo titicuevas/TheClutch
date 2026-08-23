@@ -74,14 +74,28 @@ export function LegacyCard({
           {report.seasons} temporadas · Pico OVR {report.peakOverall} · Ganado {formatWage(report.earnings)}
         </p>
         <dl className="mt-5 grid grid-cols-2 gap-2 text-sm">
-          {report.bestSeason ? <div className="rounded-xl border border-white/10 bg-ink/45 p-3"><dt className="text-xs uppercase tracking-wider text-mute">Mejor año</dt><dd className="mt-1 font-semibold">T{report.bestSeason.year} · {report.bestSeason.grade} ({report.bestSeason.score})</dd><dd className="truncate text-xs text-mute">{report.bestSeason.teamName}</dd></div> : null}
-          {report.primaryClub ? <div className="rounded-xl border border-white/10 bg-ink/45 p-3"><dt className="text-xs uppercase tracking-wider text-mute">Tu club</dt><dd className="mt-1 truncate font-semibold">{report.primaryClub.name}</dd><dd className="text-xs text-mute">{report.primaryClub.seasons} temporadas</dd></div> : null}
+          {report.bestSeason ? (
+            <div className="rounded-xl border border-white/10 bg-ink/45 p-3">
+              <dt className="text-xs uppercase tracking-wider text-mute">Mejor año</dt>
+              <dd className="mt-1 font-semibold">
+                T{report.bestSeason.year} · {report.bestSeason.grade} ({report.bestSeason.score})
+              </dd>
+              <dd className="truncate text-xs text-mute">{report.bestSeason.teamName}</dd>
+            </div>
+          ) : null}
+          {report.primaryClub ? (
+            <div className="rounded-xl border border-white/10 bg-ink/45 p-3">
+              <dt className="text-xs uppercase tracking-wider text-mute">Tu club</dt>
+              <dd className="mt-1 truncate font-semibold">{report.primaryClub.name}</dd>
+              <dd className="text-xs text-mute">{report.primaryClub.seasons} temporadas</dd>
+            </div>
+          ) : null}
         </dl>
         {report.clutchRecord.made + report.clutchRecord.missed > 0 ? (
           <p className="mt-4 text-sm text-gold">Momentos clutch · {report.clutchRecord.made} dentro · {report.clutchRecord.missed} fuera</p>
         ) : null}
         {report.definingChoice?.outcome ? (
-          <blockquote className={`mt-4 border-l-2 pl-3 text-sm leading-relaxed ${report.definingChoice.outcomeTone === "good" ? "border-good text-good" : report.definingChoice.outcomeTone === "bad" ? "border-clutch text-clutch" : "border-gold text-cream/80"}`}>
+          <blockquote className={`mt-4 border-l-2 pl-3 text-sm leading-relaxed ${choiceToneClass(report.definingChoice.outcomeTone)}`}>
             <span className="block text-xs uppercase tracking-wider text-mute">El corte que quedó</span>
             {report.definingChoice.outcome}
           </blockquote>
@@ -161,4 +175,10 @@ export function LegacyCard({
       </div>
     </article>
   );
+}
+
+function choiceToneClass(tone: "good" | "bad" | "neutral" | undefined): string {
+  if (tone === "good") return "border-good text-good";
+  if (tone === "bad") return "border-clutch text-clutch";
+  return "border-gold text-cream/80";
 }
